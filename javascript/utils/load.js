@@ -230,6 +230,7 @@ var Load = {
                 let masterNode = Load.getStoredNodeById(masterLayout, modifiedNodeConfiguration.id);
                 if (masterNode != null && nodeToModify != null && masterNode.type === nodeToModify.type) {
                     nodeToModify.state = masterNode.state;
+                    nodeToModify.pathPoints = masterNode.pathPoints;
                 }
             }
             localStorage.setItem(`webdashboard-layout:${layoutNames[i]}`, JSON.stringify(layout));
@@ -267,6 +268,19 @@ var Load = {
             Notify.createNotice("Copied layout JSON to clipboard", "positive", 3000);
         } catch {
             Notify.createNotice("Could not export layout JSON", "negative", 3000);
+        }
+    },
+
+    pasteNode: function() {
+        let copiedNode = localStorage.getItem("copiedNode");
+        if (copiedNode != undefined) {
+            Whiteboard.logChange();
+            nodeConfiguration = JSON.parse(copiedNode);
+            nodeConfiguration.id = null;
+            nodeConfiguration.position.x += 150;
+            nodeConfiguration.position.y += 150;
+            nodeConfiguration.layer = Whiteboard.layoutNodeRegistry.length;
+            Whiteboard.layoutNodeRegistry.push(new Whiteboard.WhiteboardDraggable(nodeConfiguration));
         }
     },
 

@@ -286,6 +286,7 @@ var Whiteboard = {
             this.displayLabel = this.displayLabel.bind(this);
             this.toggleLabel = this.toggleLabel.bind(this);
             this.setLastUpdate = this.setLastUpdate.bind(this);
+            this.copy = this.copy.bind(this);
         }
 
         setLastUpdate() {
@@ -640,6 +641,10 @@ var Whiteboard = {
             this.pathPoints = temp;
         }
 
+        copy() {
+            localStorage.setItem("copiedNode", JSON.stringify(this.configuration));
+        }
+
         setSize(size, restrictSize = true) {
             if (restrictSize) {
             this.configuration.size = new Positioning.Vector2d(Positioning.clamp(size.x, 50, this.whiteboard.clientWidth * 0.85), Positioning.clamp(size.y, 50, this.whiteboard.clientHeight * 0.85));
@@ -831,7 +836,7 @@ var Whiteboard = {
             for (let i = 0; i < Whiteboard.layoutNodeRegistry.length; i++) {
                 if (i != this.arrayIndex) {
                     temp.push(Whiteboard.layoutNodeRegistry[i]);
-                    Whiteboard.layoutNodeRegistry[i].updateIndex(updatedIndex); // Resets the index variable of the draggable so the draggable can find itself in the new layoutNodeRegistry array
+                    Whiteboard.layoutNodeRegistry[i].updateIndex(updatedIndex); // Resets the index variable of the node so the node can find itself in the new layoutNodeRegistry array
                     updatedIndex++;
                 }
             }

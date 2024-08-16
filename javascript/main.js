@@ -81,6 +81,9 @@ function addEventListeners() {
                 Whiteboard.undoChange();
             } else if (event.key === "y") {
                 Whiteboard.redoChange();
+            } else if (event.key === "v" && Whiteboard.editingMode && document.activeElement.nodeName !== "TEXTAREA") {
+                event.preventDefault();
+                Load.pasteNode();
             } else if (event.key === "e") {
                 event.preventDefault();
                 if (!inFullScreen()) {
@@ -158,6 +161,7 @@ function generateContextMenu(event) {
             }
             if (Whiteboard.editingMode) {
                 generateContextMenuButton(container, "remove", () => { if (Whiteboard.editingMode) { Whiteboard.logChange(); node.delete() } });
+                generateContextMenuButton(container, "copy node", () => node.copy());
                 if (node.configuration.showLabel) {
                     generateContextMenuButton(container, "hide label", () => { if (Whiteboard.editingMode) { Whiteboard.logChange(); node.toggleLabel() } });
                 } else {
@@ -197,6 +201,9 @@ function generateContextMenu(event) {
             }
         }
     } else if (event.target.id === "whiteboard-border") {
+        if (localStorage.getItem("copiedNode") != undefined) {
+            generateContextMenuButton(container, "paste node", () => Load.pasteNode());
+        }
         generateContextMenuButton(container, "set whiteboard size", () => { Popup.openPopup("whiteboard-size-setter") });
     } else if (event.target.classList.contains("selectable")) {
         if (event.target.classList.contains("layout-selectable")) {
