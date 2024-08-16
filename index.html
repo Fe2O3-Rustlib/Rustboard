@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Rustboard</title>
+    <link rel="icon" type="image/x-icon" href="./images/Logo.png">
+    <link rel="stylesheet" href="./style/whiteboard.css">
+    <link rel="stylesheet" href="./style/blue_theme.css">
+    <link rel="stylesheet" href="./style/dark_theme.css">
+    <link rel="stylesheet" href="./style/light_theme.css">
+    <link rel="stylesheet" href="./style/main.css">
+    <script type="text/javascript" src="./javascript/utils/math_utils.js"></script>
+    <script type="text/javascript" src="./javascript/utils/global_functions.js"></script>
+    <script type="text/javascript" src="./javascript/utils/settings.js"></script>
+    <script type="text/javascript" src="./javascript/utils/socket.js"></script>
+    <script type="text/javascript" src="./javascript/utils/load.js"></script>
+    <script type="text/javascript" src="./javascript/utils/event_checker.js"></script>
+    <script type="text/javascript" src="./javascript/utils/popup/popup_tasks.js"></script>
+    <script type="text/javascript" src="./javascript/utils/popup/popup.js"></script>
+    <script type="text/javascript" src="./javascript/utils/whiteboard.js"></script>
+    <script type="text/javascript" src="./javascript/utils/notify.js"></script>
+    <script type="text/javascript" src="./javascript/main.js"></script>
+</head>
+
+<body onload="initialize()">
+    <div id="banner-container">
+        <img src="./team/banner.svg" id="banner"></img>
+    </div>
+    <div id="menu">
+        <div id="layout-name-container">
+            <p id="layout-name">default layout</p>
+        </div>
+        <div id="menu-button-wrapper">
+            <div class="dropdown">
+                <button class="dropdown-button">File</button>
+                <div class="dropdown-container">
+                    <a class="dropdown-option" id="log-downloader" onclick="Socket.downloadRobotLog()">robot log</a>
+                    <a class="dropdown-option" onclick="Load.newLayout()">new layout</a>
+                    <a class="dropdown-option" onclick="Load.defaultSave()">save layout</a>
+                    <a class="dropdown-option" popup="Load-layout-as"
+                        title="Note that since this program uses local storage, data will not carry over to a different browser.  Your settings will not be saved in Firefox if you created them in Chrome!">save
+                        layout as</a>
+                    <a class="dropdown-option" onclick="Load.displayLayouts()" popup="open-layout">open layout</a>
+                    <a class="dropdown-option"
+                        onclick="Load.exportJSON(`webdashboard-layout:${Load.currentLayout}`)">export json</a>
+                    <a class="dropdown-option" popup="json-importer">import json</a>
+                    <a class="dropdown-option not-default"
+                        onclick="Load.setAsDefault(`webdashboard-layout:${Load.currentLayout}`)">set as default</a>
+                    <a class="dropdown-option not-default" popup="layout-renamer">rename layout</a>
+                    <a class="dropdown-option not-default" popup="remove-layout"
+                        onclick="Load.targetLayout = Load.currentLayout">delete layout</a>
+                    <a class="dropdown-option" popup="clear-storage">clear storage</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropdown-button">Edit</button>
+                <div class="dropdown-container">
+                    <a class="dropdown-option edit-mode-only" onclick="Whiteboard.undoChange()">undo</a>
+                    <a class="dropdown-option edit-mode-only" onclick="Whiteboard.redoChange()">redo</a>
+                    <a class="dropdown-option edit-mode-only" onclick="Load.clearLayout()">clear layout</a>
+                    <a class="dropdown-option edit-mode-only" onclick="Whiteboard.addDefaultDraggable()">add node</a>
+                    <a class="dropdown-option" id="editingToggle" onclick="Whiteboard.toggleEditingMode()">enable editing</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropdown-button">Options</button>
+                <div class="dropdown-container">
+                    <a class="dropdown-option" popup="settings">settings</a>
+                    <a class="dropdown-option" onclick="toggleFullScreen()">full screen (f11)</a>
+                </div>
+            </div>
+            <div id="transition"></div>
+        </div>
+    </div>
+    <div id="status-container">
+        <p id="status" class="default-text">disconnected</p>
+    </div>
+    <div id="whiteboard">
+        <div id="whiteboard-border"></div>
+    </div>
+    <div id="popup-background"></div>
+
+    <div id="settings" class="popup" style="width: 500px; height: 500px">
+        <a class="popup-onopen" onclick="WhiteboardSettings.populateSettingsInfo()"></a>
+        <div class="absolute-centered-wrapper" style="width: 300px">
+            <div class="horizontal-centered-wrapper">
+                <div id="websocket-info-wrapper"></div>
+                <div id="default-settings-wrapper"></div>
+            </div>
+            <div id="theme-chooser-wrapper">
+                <p class="theme-chooser-label default-text">dashboard theme</p>
+                <div id="theme-wrapper" class="selectable-container"></div>
+                <p class="theme-chooser-label default-text">theme changes will not take effect until the page is
+                    reloaded</p>
+            </div>
+        </div>
+        <button class="apply" onclick="WhiteboardSettings.saveSettings(event)">apply</button>
+    </div>
+    <div id="open-layout" class="popup" style="width: 350px; height: 300px">
+        <div class="list-container" id="select-json-container"></div>
+    </div>
+    <div id="clear-storage" class="popup" style="width: 350px; height: 200px">
+        <div class="prompt-container">
+            <p class="prompt">Are you sure you want to delete all layouts? This action cannot be undone.</p>
+        </div>
+        <button class="apply" onclick="Load.removeAllLayouts(event)">Do it!</button>
+    </div>
+    <div id="remove-layout" class="popup" style="width: 350px; height: 200px" targetLayout="">
+        <div class="prompt-container">
+            <p class="prompt">Are you sure you want to delete this layout? This action cannot be undone.</p>
+        </div>
+        <button class="apply" onclick="Load.safeDelete(event, `webdashboard-layout:${Load.targetLayout}`)">Do
+            it!</button>
+    </div>
+    <div id="type-setter" class="popup" style="width: 400px; height: 300px">
+        <div class="list-container" id="select-type-container"></div>
+    </div>
+    <div id="position-setter" class="popup" style="width: 300px; height: 275px">
+        <div class="vertical-input-container absolute-centered-wrapper" id="draggable-position-inputs"></div>
+        <button class="apply" onclick="PopupTasks.setPosition(event)">apply</button>
+    </div>
+    <div id="path-point-configuration" class="popup" style="width: 500px; height: 400px;">
+        <a class="popup-onopen" onclick="PopupTasks.populatePathPointInfo()"></a>
+        <div class="absolute-centered-wrapper" style="width: 350px; height: 250px; overflow: auto;">
+            <div class="horizontal-centered-wrapper">
+                <div class="vertical-input-container" id="point-configure-inputs"></div>
+            </div>
+        </div>
+        <button class="apply" onclick="PopupTasks.configurePathPoint(event)">apply</button>
+    </div>
+    <div id="json-importer" class="popup" style="width: 300px; height: 275px">
+        <div class="vertical-input-container absolute-centered-wrapper" id="import-json-info"></div>
+        <button class="apply" onclick="Load.importJSON(event)">apply</button>
+    </div>
+    <div id="draggable-selector-creator" class="popup" style="width: 300px; height: 285px">
+        <div class="absolute-centered-wrapper" id="selector-field-wrapper">
+            <textarea placeholder="item1, item2, item3..." id="draggable-selectable-field"></textarea>
+        </div>
+        <button class="apply" onclick="PopupTasks.defineSelectables(event)">apply</button>
+    </div>
+</body>
+
+</html>

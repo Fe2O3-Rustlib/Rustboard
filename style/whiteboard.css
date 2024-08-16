@@ -1,0 +1,135 @@
+.whiteboard-draggable {
+    z-index: 1;
+    position: absolute;
+    display: inline-block;
+    box-sizing: border-box;
+    overflow: hidden;
+    font-family: Roboto;
+    font-size: 15px;
+    user-select: none;
+    -webkit-user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.whiteboard-label {
+    font-family: Roboto;
+    text-align: center;
+    position: absolute;
+    margin: auto;
+    width: 75px;
+    height: 20px;
+    border: 3px solid black;
+}
+
+.draggable-text-container {
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+}
+
+.draggable-text-field {
+    width: calc(100% - 5px);
+    height: calc(100% - 5px);
+    font-family: Roboto;
+    font-size: 15px;
+    resize: none;
+}
+
+#whiteboard {
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.draggable-unselect-dark {
+    width: 100%;
+    height: 20px;
+    background-color: #f5770a;
+    color: black;
+    text-align: center;
+}
+
+.draggable-select-dark {
+    background-color: black;
+    color: #f5770a;
+}
+
+.draggable-unselect-blue {
+    width: 100%;
+    height: 20px;
+    background-color: white;
+    color: #0098cb;
+    text-align: center;
+}
+
+.draggable-select-blue {
+    background-color: #0098cb;
+    color: white;
+}
+
+.draggable-unselect-light {
+    width: 100%;
+    height: 20px;
+    background-color: white;
+    color: #aeaeae;
+    text-align: center;
+}
+
+.draggable-select-light {
+    background-color: #aeaeae;
+    color: white;
+}
+
+.draggable-selectable-container {
+    width: 100%;
+    height: min-content;
+    max-height: 100%;
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: repeat(auto-fill, min-content);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#draggable-selectable-field {
+    width: 200px;
+    height: 150px;
+    border-radius: 7px;
+    font-family: Roboto;
+    font-size: 15px;
+    resize: none;
+    padding: 5px;
+}
+
+.camera-stream {
+    user-select: none;
+}
+
+.path {
+    user-select: none;
+    -webkit-user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    
+}
+
+.path-point {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: #f5770a;
+    position: fixed;
+}
+
+.canvas {
+    background-color: white;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
