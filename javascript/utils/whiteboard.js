@@ -158,6 +158,7 @@ var Whiteboard = {
             followTimeout: undefined,
             pathPoints: [],
             showLabel: true,
+            distanceToPixels: 5,
             last_node_update: 0,
         };
 
@@ -220,6 +221,7 @@ var Whiteboard = {
             this.configuration.pathPoints = configuration.pathPoints;
             this.configuration.followTimeout = configuration.followTimeout;
             this.configuration.showLabel = getValue(configuration.showLabel, true);
+            this.configuration.distanceToPixels = getValue(configuration.distanceToPixels, 5);
             this.displayLabel();
 
 
@@ -287,6 +289,7 @@ var Whiteboard = {
             this.toggleLabel = this.toggleLabel.bind(this);
             this.setLastUpdate = this.setLastUpdate.bind(this);
             this.copy = this.copy.bind(this);
+            this.drawGraph = this.drawGraph.bind(this);
         }
 
         setLastUpdate() {
@@ -329,7 +332,11 @@ var Whiteboard = {
                     this.selectableGroup.select(toSelect);
                     this.configuration.state = toSelect.name;
                 } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.GRAPH) {
-                    state = state.replace(" ", "")
+                    if (state === "") {
+                        state = "x: 0 y: 0.0 heading: 0.0";
+                        this.configuration.state = state;
+                    }
+                    state = state.replace(/\s+/g, "")
                     let x = 0.00;
                     let y = 0.00;
                     let heading = 0.00;
@@ -338,7 +345,7 @@ var Whiteboard = {
                         y = Positioning.round(parseFloat(state.match(/y:-?[0-9.]*/)[0].replace("y:", "")), 4);
                         heading = parseFloat(state.match(/heading:-?[0-9.]*/)[0].replace("heading:", ""));
                     } catch {
-                        Notify.createNotice("Couldn't read robot position info!", "negative", 3000)
+                        Notify.createNotice("Failed to parse robot position data", "negative", 3000)
                     }
                     this.drawGraph(x, y, heading);
                 }
@@ -393,7 +400,7 @@ var Whiteboard = {
             this.context.fillText("x: " + botX, 10, 20);
             this.context.fillText("y: " + botY, 10, 40);
             this.context.fillText("heading: " + Positioning.round((heading * 180 / Math.PI) % 360, 2) + "°", 10, 60);         
-            let multiplier = 5;        
+            let multiplier = this.configuration.distanceToPixels;
             this.drawRect(new Positioning.Pose2d(new Positioning.Vector2d(botX * multiplier, botY * multiplier), heading), 50, 50, "#3973ac");
             this.drawArrow(new Positioning.Pose2d(new Positioning.Vector2d(botX * multiplier, botY * multiplier), heading), 40, 40, "white");
         }

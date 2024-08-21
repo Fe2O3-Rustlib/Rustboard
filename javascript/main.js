@@ -33,6 +33,7 @@ function initialize() { // This is called when the body portion of the html docu
     Popup.generateSimpleInputPopup("stream-size-setter", PopupTasks.setStreamSize, new Popup.PopupInput("width x height", "stream size"));
     Popup.generateSimpleInputPopup("text-telemetry-font-size-setter", PopupTasks.setFontSize, new Popup.PopupInput("15", "font size"));
     Popup.generateSimpleInputPopup("path-timeout-setter", PopupTasks.setPathTimeout, new Popup.PopupInput("10000", "path timeout (milliseconds)"));
+    Popup.generateSimpleInputPopup("distance-to-pixels-setter", PopupTasks.setDistanceToPixels, new Popup.PopupInput(5, "distance to pixels constant"));
     Popup.setOnOpen("path-timeout-setter", PopupTasks.populatePathTimeout);
 
     Popup.setOnOpen("stream-url-setter", () => Popup.getInput("stream-url-input").value = Whiteboard.currentNode.configuration.streamURL);
@@ -169,6 +170,9 @@ function generateContextMenu(event) {
                 generateContextMenuButton(container, "send to front", () => { Whiteboard.logChange(); node.setLayer(Whiteboard.layoutNodeRegistry.length - 1) });
                 generateContextMenuButton(container, "send to back", () => { Whiteboard.logChange(); node.setLayer(0) });
                 generateContextMenuButton(container, "set id", () => {Popup.openPopup("id-changer"); Popup.getInput("draggable-id").value = node.configuration.id});
+                if (node.isType(Whiteboard.WhiteboardDraggable.Types.GRAPH)) {
+                    generateContextMenuButton(container, "configure units", () => Popup.openPopup("distance-to-pixels-setter"));
+                }
                 if (!node.isType(Whiteboard.WhiteboardDraggable.Types.TOGGLE) && !node.isType(Whiteboard.WhiteboardDraggable.Types.BOOLEAN_TELEMETRY)) {
                     generateContextMenuButton(container, "set color", () => Popup.openPopup("color-picker"));
                 }

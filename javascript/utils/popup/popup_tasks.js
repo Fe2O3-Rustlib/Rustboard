@@ -178,6 +178,17 @@ var PopupTasks = {
         Popup.closePopup(popup);
     },
 
+    setDistanceToPixels: function() {
+        let popup = Popup.getPopupFromChild(event.target);
+        let distanceToPixels = parseFloat(popup.getElementsByClassName("popup-input")[0].value);
+        if (isNaN(distanceToPixels)) {
+            Notify.createNotice("Not a number", "negative", 5000);
+        } else {
+            Whiteboard.currentNode.configuration.distanceToPixels = distanceToPixels;
+            Popup.closePopup(popup);
+        }
+    },
+
     configurePathPoint: function(event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);

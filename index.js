@@ -2,7 +2,6 @@ const { app, BrowserWindow, Menu } = require("electron");
 path = require("path");
 
 function createWindow() {
-  console.log(path);
     const win = new BrowserWindow({
       width: 800,
       height: 600,
