@@ -96,7 +96,6 @@ var Socket = {
     },
 
     handleMessage: function (message) {
-        console.log(message);
         Socket.lastMessageTimestamp = Date.now();
         if (message.action === Socket.MessageActions.requestClientDetails) {
             Socket.sendRustboardDetails();

@@ -47,6 +47,10 @@
     border: 5px solid black;
 }
 
+.popup-input-dark::placeholder {
+    color: #993d00;
+}
+
 .apply-dark {
     background-color: #f5770a;
     color: black;
