@@ -158,7 +158,7 @@ var Whiteboard = {
             followTimeout: undefined,
             pathPoints: [],
             showLabel: true,
-            last_update: 0,
+            last_node_update: 0,
         };
 
         constructor(configuration) {
@@ -206,7 +206,7 @@ var Whiteboard = {
 
             // #region declare class fields
             this.configuration.type = configuration.type; // initialize the type variable
-            this.configuration.last_update = getValue(configuration.last_update, 0);
+            this.configuration.last_node_update = getValue(configuration.last_node_update, 0);
 
             this.updateIndex(Whiteboard.layoutNodeRegistry.length);
             this.configuration.name = configuration.name;
@@ -290,7 +290,7 @@ var Whiteboard = {
         }
 
         setLastUpdate() {
-            this.configuration.last_update = Date.now();
+            this.configuration.last_node_update = Date.now();
         }
 
         generateSelectorHTML(selectableNames) {
@@ -496,7 +496,7 @@ var Whiteboard = {
                         action: "click_button",
                         node_id: this.configuration.id,
                     };
-                    Socket.sendData(Json.stringify(message));
+                    Socket.sendData(JSON.stringify(message));
                 }
             }
         }
@@ -643,6 +643,7 @@ var Whiteboard = {
 
         copy() {
             localStorage.setItem("copiedNode", JSON.stringify(this.configuration));
+            Notify.createNotice("copied", "positive", 3000);
         }
 
         setSize(size, restrictSize = true) {
@@ -656,21 +657,19 @@ var Whiteboard = {
             this.label.style.width = Positioning.toHTMLPositionPX(Positioning.clamp(this.configuration.size.x * 0.75, 75, Number.POSITIVE_INFINITY));
             Draggable.dragOffset = new Positioning.Vector2d(0, 0); // Calling setPosition() will take into account the dragOffset variable.  This isn't desirable here, so it is set to (0, 0)
             this.setPosition(this.configuration.position); // If this method is not called, the position of the label relative to that of the div will be wrong
-            if (this.isType(Whiteboard.WhiteboardDraggable.Types.GRAPH) || this.isType(Whiteboard.WhiteboardDraggable.Types.PATH)) {
-                this.canvas.style.width = Positioning.toHTMLPositionPX(this.configuration.size.x);
-                this.canvas.style.height = Positioning.toHTMLPositionPX(this.configuration.size.y);
-                this.canvas.width = this.configuration.size.x;
-                this.canvas.height = this.configuration.size.y;
-                if (this.isType(Whiteboard.WhiteboardDraggable.Types.GRAPH)) {
-                    this.drawGraph(0, 0, 0);
-                } else if (Whiteboard.WhiteboardDraggable.Types.PATH) {
-                    this.fieldImg.style.width = Positioning.toHTMLPositionPX(this.configuration.size.x);
-                    this.fieldImg.style.height = Positioning.toHTMLPositionPX(this.configuration.size.y);
-                    for (let i = 0; i < this.pathPoints.length; i++) {
-                        this.pathPoints[i].setFieldPosition(this.pathPoints[i].fieldVector);
-                    }
+            this.canvas.style.width = Positioning.toHTMLPositionPX(this.configuration.size.x);
+            this.canvas.style.height = Positioning.toHTMLPositionPX(this.configuration.size.y);
+            this.canvas.width = this.configuration.size.x;
+            this.canvas.height = this.configuration.size.y;
+            this.fieldImg.style.width = Positioning.toHTMLPositionPX(this.configuration.size.x);
+            this.fieldImg.style.height = Positioning.toHTMLPositionPX(this.configuration.size.y);
+            if (this.isType(Whiteboard.WhiteboardDraggable.Types.GRAPH)) {
+                this.drawGraph(0, 0, 0);
+            } else if (Whiteboard.WhiteboardDraggable.Types.PATH) {
+                for (let i = 0; i < this.pathPoints.length; i++) {
+                    this.pathPoints[i].setFieldPosition(this.pathPoints[i].fieldVector);
                 }
-            }
+            }            
         }
 
         setFontSize(size) {
@@ -900,7 +899,7 @@ var Whiteboard = {
 
     // #region undo/redo
     logChange: function () {
-        Socket.sendLayout();
+        Socket.sendRustboard();
         let state = new Whiteboard.WhiteboardState();
         if (Whiteboard.States.stateIndex != Whiteboard.States.timeline.length) {
             Whiteboard.States.timeline = Whiteboard.States.timeline.slice(0, Whiteboard.States.stateIndex); // If the state index is not at the very end of the timeline, the user must have undone some tasks.  It doesn't make sense to keep those tasks as part of the timeline (they technically don't exist, because they have been undone), so they are deleted.
@@ -957,6 +956,7 @@ var Whiteboard = {
         }
         Whiteboard.States.timeline[Whiteboard.States.stateIndex].restore();
         Load.findLinkedNodes();
+        Socket.sendRustboard();
     },
 
     redoChange: function () {
@@ -977,6 +977,7 @@ var Whiteboard = {
             Whiteboard.States.timeline[Whiteboard.States.stateIndex].restore();
         }
         Load.findLinkedNodes();
+        Socket.sendRustboard();
     },
     // #endregion
 
@@ -1022,8 +1023,7 @@ var Whiteboard = {
         for (let i = 0; i < layoutNames.length; i++) {
             if (layoutNames[i] !== Load.currentLayout) {
                 try {
-                    console.log(nodeData);
-                    let nodeData = Load.layouts[i].nodeData;
+                    let nodeData = JSON.parse(`webdashboard-layout:${layoutNames[i]}`).nodeData;
                     for (let ii = 0; ii < nodeData.length; ii++) {
                         if (nodeData[ii].id === id && nodeData[ii].type !== type) {
                             return true;
@@ -1035,6 +1035,41 @@ var Whiteboard = {
             }
         }        
         return false;
+    },
+
+    getSendableRustboardJson: function() {
+        let nodes = new Map();
+        let layoutNames = Load.listLayoutNames();
+        for (let i = 0; i < layoutNames.length; i++) {
+            if (layoutNames[i] !== Load.currentLayout) {
+                let layoutObject = JSON.parse(localStorage.getItem(`webdashboard-layout:${layoutNames[i]}`));
+                for (let ii = 0; ii < layoutObject.nodeData.length; ii++) {
+                    let nodeConfiguration = layoutObject.nodeData[ii];
+                    nodes.set(
+                        nodeConfiguration.id,
+                        {
+                            node_id: nodeConfiguration.id,
+                            node_type: nodeConfiguration.type,
+                            node_state: nodeConfiguration.state,
+                            last_node_update: nodeConfiguration.last_node_update,
+                        }
+                    );
+                }
+            }
+        }
+        for (let i = 0; i < Whiteboard.layoutNodeRegistry.length; i++) {
+            let nodeConfiguration = Whiteboard.layoutNodeRegistry[i].configuration;
+            nodes.set(
+                nodeConfiguration.id,
+                {
+                    node_id: nodeConfiguration.id,
+                    node_type: nodeConfiguration.type,
+                    node_state: nodeConfiguration.state,
+                    last_node_update: nodeConfiguration.last_node_update,
+                }
+            );
+        }
+        return Array.from(nodes.values());
     },
 
     layoutNodeRegistry: [],

@@ -68,7 +68,7 @@ function initialize() { // This is called when the body portion of the html docu
 
 function addEventListeners() {
     addEventListener("keydown", (event) => {
-        if ((event.ctrlKey || event.metaKey)) { //meta key is for MacOS
+        if ((event.ctrlKey || event.metaKey)) { // the meta key is for MacOS
             if (event.key == "s") {
                 event.preventDefault();
                 if (event.shiftKey) {
@@ -76,12 +76,11 @@ function addEventListeners() {
                 } else {
                     Load.defaultSave();
                 }
-                Notify.createNotice("Layout saved!", "positive", 3000);
             } else if (event.key === "z") {
                 Whiteboard.undoChange();
             } else if (event.key === "y") {
                 Whiteboard.redoChange();
-            } else if (event.key === "v" && Whiteboard.editingMode && document.activeElement.nodeName !== "TEXTAREA") {
+            } else if (event.key === "v" && Whiteboard.editingMode && document.activeElement.nodeName !== "TEXTAREA" && document.activeElement.nodeName !== "INPUT") {
                 event.preventDefault();
                 Load.pasteNode();
             } else if (event.key === "e") {

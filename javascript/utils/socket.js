@@ -6,7 +6,20 @@ var Socket = {
     log: "",
     uuid: "",
 
+    MessageActions: {
+        requestClientDetails: "request_client_details",
+        clientDetails: "client_details",
+        setActive: "set_active",
+        updateNodes: "update_nodes",
+        createNotice: "create_notice",
+        consoleLog: "console_log",
+        consoleWarn: "console_warn",
+        clearLog: "clear_log",
+        log: "log"
+    },
+
     initializeSocket: function () {
+        Socket.sendRustboardDetails(); // Delete later
         loadedUUID = localStorage.getItem("uuid");
         if (loadedUUID == null) {
             loadedUUID = crypto.randomUUID();
@@ -23,12 +36,21 @@ var Socket = {
         Socket.openSocket(0);
     },
 
-    sendLayout: function () {
+
+    sendRustboard: function() {
         let message = { 
-            action: "client_details",
+            action: Socket.MessageActions.updateNodes,
+            nodes: Whiteboard.getSendableRustboardJson(),
+        };
+        Socket.sendData(JSON.stringify(message));
+    },
+
+    sendRustboardDetails: function () {
+        let message = { 
+            action: Socket.MessageActions.clientDetails,
             utc_time: Date.now(),
             uuid: Socket.uuid,
-            nodes: Load.getLayoutObject().nodeData,
+            nodes: Whiteboard.getSendableRustboardJson(),
         };
         Socket.sendData(JSON.stringify(message));
     },
@@ -57,7 +79,7 @@ var Socket = {
             Notify.createNotice("Connected to the robot", "positive", 8000);
             document.getElementById("status-container").style.backgroundColor = "limegreen";
             document.getElementById("status").innerHTML = "queued";
-            Socket.sendLayout();
+            Socket.sendRustboardDetails();
         };
         Socket.websocket.onmessage = (event) => { Socket.handleMessage(JSON.parse(event.data)) };
         if (recursion == 0) {
@@ -74,28 +96,32 @@ var Socket = {
     },
 
     handleMessage: function (message) {
+        console.log(message);
         Socket.lastMessageTimestamp = Date.now();
-        if (message.action === "set_active") {
+        if (message.action === Socket.MessageActions.requestClientDetails) {
+            Socket.sendRustboardDetails();
+        } if (message.action === Socket.MessageActions.setActive) {
             document.getElementById("status").innerHTML = "connected";
-        } else if (message.action === "update_nodes") {
+        } else if (message.action === Socket.MessageActions.updateNodes) {
             try {
                 for (let i = 0; i < message.nodes.length; i++) {
                     toUpdate = message.nodes[i];
-                    Whiteboard.updateNodeState(toUpdate.id, toUpdate.type, toUpdate.state);
-                    console.log("successfully update nodes");
+                    Whiteboard.updateNodeState(toUpdate.node_id, toUpdate.node_type, toUpdate.node_state);
                 }
             } catch (error) {
                 console.warn(error);
             }
-        } else if (message.action === "create_notice") {
+        } else if (message.action === Socket.MessageActions.createNotice) {
             Notify.createNotice(message.notice_message, message.notice_type, parseInt(message.notice_duration));
-        } else if (message.action === "console_log") {
+        } else if (message.action === Socket.MessageActions.consoleLog) {
             console.log(message.info);
-        } else if (message.action === "clear_log") {
-            Socket.log = "";
-        } else if (message.action === "log") {
+        } else if (message.action === Socket.MessageActions.consoleWarn) {
+            console.warn(message.info);
+        } else if (message.action === Socket.MessageActions.log) {
             Socket.log += "\n" + message.value;
             localStorage.setItem("webdashboard-log", Socket.log);
+        } else if (message.action === Socket.MessageActions.clearLog) {
+            Socket.log = "";
         }
     },
 

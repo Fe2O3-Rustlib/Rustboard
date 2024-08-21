@@ -80,7 +80,7 @@ var Load = {
             Load.getDraggableName(Whiteboard.layoutNodeRegistry[i]);
         }
         localStorage.setItem(`webdashboard-layout:${Load.currentLayout}`, Load.getLayoutJSONString());
-        if (notify) Notify.createNotice("Layout saved!", "positive", 3000);
+        if (notify) Notify.createNotice("Layout saved", "positive", 3000);
     },
 
     newLayout: function () {
@@ -144,6 +144,9 @@ var Load = {
     },
 
     openJSONLayout: function (key) {
+        if (Whiteboard.layoutNodeRegistry > 0) {
+            Load.defaultSave(false);
+        }
         Load.handleNotDefaultBtns(key);
         Load.updateCurrentLayout(key.replace(/webdashboard-layout:/, ""));
         Load.clearLayout(logChange = false);
@@ -206,7 +209,11 @@ var Load = {
     },
 
     updateLinkedNodes: function() {
-        let linkedNodeData = JSON.parse(localStorage.getItem("linkedNodes"));
+        let linkedNodeJson = localStorage.getItem("linkedNodes");
+        if (linkedNodeJson == undefined) {
+            return;
+        }
+        let linkedNodeData = JSON.parse(linkedNodeJson);
         let masterLayout = JSON.parse(localStorage.getItem(`webdashboard-layout:${linkedNodeData.masterLayout}`));
         let layoutsToModify = {};
         for (let i = 0; i < linkedNodeData.linkedNodes.length; i++) {
@@ -231,6 +238,11 @@ var Load = {
                 if (masterNode != null && nodeToModify != null && masterNode.type === nodeToModify.type) {
                     nodeToModify.state = masterNode.state;
                     nodeToModify.pathPoints = masterNode.pathPoints;
+                    nodeToModify.last_node_update = masterNode.last_node_update;
+                    if (layoutNames[i] === Load.currentLayout) {
+                        Whiteboard.getNodeById(nodeToModify.id).setState(masterNode.state);
+                        Whiteboard.getNodeById(nodeToModify.id).configuration.pathPoints = masterNode.pathPoints;
+                    }
                 }
             }
             localStorage.setItem(`webdashboard-layout:${layoutNames[i]}`, JSON.stringify(layout));
@@ -253,7 +265,7 @@ var Load = {
         }
         Load.updateLinkedNodes();
         Load.findLinkedNodes();
-        Socket.sendLayout();
+        Socket.sendRustboard();
     },
 
     exportJSON: function (key) {
@@ -273,7 +285,9 @@ var Load = {
 
     pasteNode: function() {
         let copiedNode = localStorage.getItem("copiedNode");
-        if (copiedNode != undefined) {
+        if (copiedNode == undefined) {
+            Notify.createNotice("Nothing to copy ¯\_(ツ)_/¯", "negative", 5000);
+        } else {
             Whiteboard.logChange();
             nodeConfiguration = JSON.parse(copiedNode);
             nodeConfiguration.id = null;

@@ -1,6 +1,10 @@
 var Notify = {
     Notice: class {
         constructor(message, type, duration) {
+            let activeNotices = document.querySelectorAll(".notice-container");
+            for (let i = 0; i < activeNotices.length; i++) {
+                activeNotices[i].remove();
+            }
             let color = "gray";
             if (type === "positive") {
                 color = "limegreen";
@@ -28,9 +32,8 @@ var Notify = {
             this.fadeOutAnimation = [{ opacity: 1 }, { opacity: 0 }];
             this.fadeTiming = { duration: 500, iterations: 1 };
 
-            this.fadeSequence();
-
             this.duration = duration;
+            this.fadeSequence();
         }
 
         fadeSequence() {
