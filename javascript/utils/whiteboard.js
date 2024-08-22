@@ -336,7 +336,7 @@ var Whiteboard = {
                 } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.TEXT_TELEMETRY) {
                     this.textContainer.innerHTML = state;
                 } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.TEXT_INPUT) {
-                    this.textField.innerHTML = state;
+                    this.textField.value = state;
                 } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.SELECTOR) {
                     let toSelect = null;
                     for (let i = 0; i < this.selectableGroup.selectables.length; i++) {
@@ -501,6 +501,7 @@ var Whiteboard = {
                 node_id: this.configuration.id,
                 node_type: this.configuration.type,
                 node_state: this.configuration.state,
+                last_node_update: this.configuration.last_node_update
             };
             Socket.sendData(JSON.stringify(message));
         }
