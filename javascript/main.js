@@ -91,6 +91,10 @@ function addEventListeners() {
             } else if (event.key === "q" && Whiteboard.editingMode) {
                 event.preventDefault();
                 Whiteboard.addDefaultNode();
+            } else if (event.key === "o") {
+                event.preventDefault();
+                Popup.openPopup("open-layout");
+                Load.displayLayouts();
             }
         }
     });

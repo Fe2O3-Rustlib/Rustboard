@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Rustboard</title>
-    <link rel="icon" type="image/x-icon" href="./images/Logo.png">
+    <link rel="icon" type="image/x-icon" href="./team/icon.png">
     <link rel="stylesheet" href="./style/whiteboard.css">
     <link rel="stylesheet" href="./style/blue_theme.css">
     <link rel="stylesheet" href="./style/dark_theme.css">
@@ -39,7 +39,7 @@
                     <a class="dropdown-option" onclick="Load.newLayout()">new layout</a>
                     <a class="dropdown-option" onclick="Load.defaultSave()" title="ctrl+s">save layout</a>
                     <a class="dropdown-option" popup="Load-layout-as" title="ctrl+shift+s">save layout as</a>
-                    <a class="dropdown-option" onclick="Load.displayLayouts()" popup="open-layout">open layout</a>
+                    <a class="dropdown-option" onclick="Load.displayLayouts()" popup="open-layout" title="ctrl+o">open layout</a>
                     <a class="dropdown-option"
                         onclick="Load.exportJSON(`webdashboard-layout:${Load.currentLayout}`)">export json</a>
                     <a class="dropdown-option" popup="json-importer">import json</a>
