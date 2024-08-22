@@ -111,7 +111,7 @@ var Load = {
             return () => {
                 Load.openJSONLayout(`webdashboard-layout:${name}`); Popup.closePopup(popup);
             }
-        }, "layout-selectable default-selectable " + WhiteboardSettings.Themes.selectedTheme.defaultSelectable);
+        }, "layout-selectable default-selectable " + SettingsManager.Themes.selectedTheme.defaultSelectable);
     },
 
     getLayoutObject: function () {
@@ -127,11 +127,6 @@ var Load = {
 
     getLayoutJSONString: function () {
         return JSON.stringify(Load.getLayoutObject());
-    },
-
-    loadSettings: function () {
-        let settings = JSON.parse(localStorage.getItem("webdashboard-settings"));
-        //Object.assign(WhiteboardSettings, settings);
     },
 
     handleNotDefaultBtns: function (key) {

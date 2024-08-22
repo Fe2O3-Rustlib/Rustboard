@@ -44,7 +44,8 @@
 
 .popup-input-light {
     background-color: white;
-    border: 5px solid #aeaeae;
+    border: solid #aeaeae;
+    color: #aeaeae;
 }
 
 .apply-light {

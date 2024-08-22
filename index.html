@@ -37,10 +37,8 @@
                 <div class="dropdown-container">
                     <a class="dropdown-option" id="log-downloader" onclick="Socket.downloadRobotLog()">robot log</a>
                     <a class="dropdown-option" onclick="Load.newLayout()">new layout</a>
-                    <a class="dropdown-option" onclick="Load.defaultSave()">save layout</a>
-                    <a class="dropdown-option" popup="Load-layout-as"
-                        title="Note that since this program uses local storage, data will not carry over to a different browser.  Your settings will not be saved in Firefox if you created them in Chrome!">save
-                        layout as</a>
+                    <a class="dropdown-option" onclick="Load.defaultSave()" title="ctrl+s">save layout</a>
+                    <a class="dropdown-option" popup="Load-layout-as" title="ctrl+shift+s">save layout as</a>
                     <a class="dropdown-option" onclick="Load.displayLayouts()" popup="open-layout">open layout</a>
                     <a class="dropdown-option"
                         onclick="Load.exportJSON(`webdashboard-layout:${Load.currentLayout}`)">export json</a>
@@ -56,11 +54,11 @@
             <div class="dropdown">
                 <button class="dropdown-button">Edit</button>
                 <div class="dropdown-container">
-                    <a class="dropdown-option edit-mode-only" onclick="Whiteboard.undoChange()">undo</a>
-                    <a class="dropdown-option edit-mode-only" onclick="Whiteboard.redoChange()">redo</a>
+                    <a class="dropdown-option edit-mode-only" onclick="Whiteboard.undoChange()" title="ctrl+z">undo</a>
+                    <a class="dropdown-option edit-mode-only" onclick="Whiteboard.redoChange()" title="ctrl+y">redo</a>
                     <a class="dropdown-option edit-mode-only" onclick="Load.clearLayout()">clear layout</a>
-                    <a class="dropdown-option edit-mode-only" onclick="Whiteboard.addDefaultDraggable()">add node</a>
-                    <a class="dropdown-option" id="editingToggle" onclick="Whiteboard.toggleEditingMode()">enable editing</a>
+                    <a class="dropdown-option edit-mode-only" onclick="Whiteboard.addDefaultNode()" title="ctrl+q">add node</a>
+                    <a class="dropdown-option" id="editingToggle" onclick="Whiteboard.toggleEditingMode()" title="ctrl+e">enable editing</a>
                 </div>
             </div>
             <div class="dropdown">
@@ -82,7 +80,7 @@
     <div id="popup-background"></div>
 
     <div id="settings" class="popup" style="width: 500px; height: 500px">
-        <a class="popup-onopen" onclick="WhiteboardSettings.populateSettingsInfo()"></a>
+        <a class="popup-onopen" onclick="SettingsManager.populateSettingsInfo()"></a>
         <div class="absolute-centered-wrapper" style="width: 300px">
             <div class="horizontal-centered-wrapper">
                 <div id="websocket-info-wrapper"></div>
@@ -91,11 +89,9 @@
             <div id="theme-chooser-wrapper">
                 <p class="theme-chooser-label default-text">dashboard theme</p>
                 <div id="theme-wrapper" class="selectable-container"></div>
-                <p class="theme-chooser-label default-text">theme changes will not take effect until the page is
-                    reloaded</p>
             </div>
         </div>
-        <button class="apply" onclick="WhiteboardSettings.saveSettings(event)">apply</button>
+        <button class="apply" onclick="SettingsManager.saveSettings(event)">apply</button>
     </div>
     <div id="open-layout" class="popup" style="width: 350px; height: 300px">
         <div class="list-container" id="select-json-container"></div>
@@ -140,5 +136,4 @@
         <button class="apply" onclick="PopupTasks.defineSelectables(event)">apply</button>
     </div>
 </body>
-
 </html>

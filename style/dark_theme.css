@@ -44,7 +44,7 @@
 
 .popup-input-dark {
     background-color: #f5770a;
-    border: 5px solid black;
+    border: solid black;
 }
 
 .popup-input-dark::placeholder {

@@ -8,16 +8,16 @@
 }
 
 .transition-blue {
-    background-image: linear-gradient(to right, white, #0098cb);
+    background-image: linear-gradient(to right, #e6ffff, #0098cb);
 }
 
 .whiteboard-blue {
-    background-color: white;
+    background-color: #e6ffff;
 }
 
 .menu-button-blue {
     color: #0098cb;
-    background-color: white;
+    background-color: #e6ffff;
 }
 
 .menu-button-blue:hover {
@@ -44,7 +44,8 @@
 
 .popup-input-blue {
     background-color: white;
-    border: 5px solid #0098cb;
+    border: solid #0098cb;
+    color: #0098cb;
 }
 
 .apply-blue {

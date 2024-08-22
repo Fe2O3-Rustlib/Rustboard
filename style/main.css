@@ -203,6 +203,7 @@ body {
 }
 
 .popup-input {
+    border-width: 3px;
     border-radius: 7px;
     font-family: Roboto;
     font-size: 15px;
@@ -273,7 +274,7 @@ body {
     grid-template-rows: min-content;
     max-height: calc(100% - 50px);
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
     background-color: white;
 }
 
@@ -337,6 +338,7 @@ body {
     padding-bottom: 3px;
     padding-right: 15px;
     padding-left: 15px;
+    border-radius: 0px 0px 0px 10px;
 }
 
 #layout-name {
@@ -400,6 +402,7 @@ body {
     padding-right: 15px;
     padding-left: 15px;
     background-color: red;
+    border-radius: 0px 10px 0px 0px;
 }
 
 #status {
@@ -413,7 +416,7 @@ body {
     grid-template-columns: 100%;
     grid-template-rows: repeat(auto-fill, min-content);
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 #theme-chooser-wrapper {

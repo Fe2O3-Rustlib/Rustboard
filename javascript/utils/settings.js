@@ -2,10 +2,9 @@ window.getModifier = function (baseClass, key) {
     return baseClass + key;
 };
 
-var WhiteboardSettings = {
-    dashboardID: "dashboard_0",
+var SettingsManager = {
     teamNumber: 21865,
-    websocketURL: "ws://192.168.43.1:5837",
+    websocketURL: "ws://192.168.43.1:5801",
     defaultDraggable: null,
 
     Themes: {
@@ -58,7 +57,8 @@ var WhiteboardSettings = {
             attributes: {
                 closeSrc: "./images/close-blue.svg",
                 nodeHover: "black",
-                draggableLabelColor: "white",
+                draggableLabelBackground: "white",
+                draggableLabelColor: "#0098cb",
             }
         },
         CHARCOAL: {
@@ -83,7 +83,8 @@ var WhiteboardSettings = {
             attributes: {
                 closeSrc: "./images/close-dark.svg",
                 nodeHover: "black",
-                draggableLabelColor: "#e1e8e3",
+                draggableLabelBackground: "#39303b",
+                draggableLabelColor: "#f5770a",
             }
         },
         LIGHT: {
@@ -108,26 +109,42 @@ var WhiteboardSettings = {
             attributes: {
                 closeSrc: "./images/close-light.svg",
                 nodeHover: "black",
-                draggableLabelColor: "white",
+                draggableLabelBackground: "white",
+                draggableLabelColor: "#aeaeae",
             }
         },
 
-        selectedTheme: null,
+        selectedThemeName: null,
+        selectedTheme: null
     },
 
     saveSettings: function (event) {
         let popup = Popup.getPopupFromChild(event.target);
-        WhiteboardSettings.teamNumber = Popup.getInputValue("team-number");
-        WhiteboardSettings.websocketURL = Popup.getInputValue("websocket-url");
-        WhiteboardSettings.dashboardID = Popup.getInputValue("dashboard-id");
-        localStorage.setItem("webdashboard-settings", JSON.stringify(WhiteboardSettings));
+        SettingsManager.teamNumber = Popup.getInputValue("team-number");
+        SettingsManager.websocketURL = Popup.getInputValue("websocket-url");
+        let storedSettings = {
+            teamNumber: SettingsManager.teamNumber,
+            websocketURL: SettingsManager.websocketURL,
+            selectedThemeName: SettingsManager.Themes.selectedThemeName 
+        }
+        localStorage.setItem("webdashboard-settings", JSON.stringify(storedSettings));
         Popup.closePopup(popup);
+        if (SettingsManager.Themes[SettingsManager.Themes.selectedThemeName] != SettingsManager.Themes.selectedTheme) {
+            location.reload();
+        }
+    },
+
+    loadSettings: function() {
+        let storedSettings = getValue(JSON.parse(localStorage.getItem("webdashboard-settings")), {});
+        SettingsManager.teamNumber = getValue(storedSettings.teamNumber, 0);
+        SettingsManager.websocketURL = getValue(storedSettings.websocketURL, "ws://192.168.43.1:5801");
+        SettingsManager.Themes.selectedThemeName = getValue(storedSettings.selectedThemeName, "CHARCOAL");
+        SettingsManager.Themes.selectedTheme = SettingsManager.Themes[SettingsManager.Themes.selectedThemeName];
     },
 
     populateSettingsInfo: function () {
-        Popup.setInputValue("dashboard-id", WhiteboardSettings.dashboardID);
-        Popup.setInputValue("team-number", WhiteboardSettings.teamNumber);
-        Popup.setInputValue("websocket-url", WhiteboardSettings.websocketURL);
+        Popup.setInputValue("team-number", SettingsManager.teamNumber);
+        Popup.setInputValue("websocket-url", SettingsManager.websocketURL);
     },
 
     addStyleClass(currentClass, toAdd) {
@@ -148,29 +165,29 @@ var WhiteboardSettings = {
     },
 
     setTheme: function () {
-        let theme = WhiteboardSettings.Themes.selectedTheme;
-        let baseTheme = WhiteboardSettings.Themes.BASE;
-        WhiteboardSettings.addStyleClass("default-text", getModifier(baseTheme.defaultText, theme.key));
+        let theme = SettingsManager.Themes.selectedTheme;
+        let baseTheme = SettingsManager.Themes.BASE;
+        SettingsManager.addStyleClass("default-text", getModifier(baseTheme.defaultText, theme.key));
         document.getElementById("menu").classList.add(getModifier(baseTheme.menu, theme.key));
         document.getElementById("transition").classList.add(getModifier(baseTheme.menuTransition, theme.key));
         document.getElementById("whiteboard").classList.add(getModifier(baseTheme.whiteboard, theme.key));
-        WhiteboardSettings.addStyleClass("menu-button", getModifier(baseTheme.menuBtn, theme.key));
-        WhiteboardSettings.addStyleClass("dropdown-button", getModifier(baseTheme.menuBtn, theme.key));
-        WhiteboardSettings.addStyleClass("dropdown", getModifier(baseTheme.menuBtn, theme.key));
-        WhiteboardSettings.addStyleClass("dropdown-option", getModifier(baseTheme.menuBtn, theme.key));
+        SettingsManager.addStyleClass("menu-button", getModifier(baseTheme.menuBtn, theme.key));
+        SettingsManager.addStyleClass("dropdown-button", getModifier(baseTheme.menuBtn, theme.key));
+        SettingsManager.addStyleClass("dropdown", getModifier(baseTheme.menuBtn, theme.key));
+        SettingsManager.addStyleClass("dropdown-option", getModifier(baseTheme.menuBtn, theme.key));
         document.getElementById("layout-name-container").classList.add(getModifier(baseTheme.layoutName, theme.key));
         document.getElementById("layout-name").classList.add(getModifier(baseTheme.layoutNameTxt, theme.key));
-        WhiteboardSettings.addStyleClass("popup", getModifier(baseTheme.popup, theme.key));
-        WhiteboardSettings.addStyleClass("input-label", getModifier(baseTheme.inputLabel, theme.key));
-        WhiteboardSettings.addStyleClass("popup-input", getModifier(baseTheme.popupInput, theme.key));
-        WhiteboardSettings.addStyleClass("apply", getModifier(baseTheme.applyBtn, theme.key));
+        SettingsManager.addStyleClass("popup", getModifier(baseTheme.popup, theme.key));
+        SettingsManager.addStyleClass("input-label", getModifier(baseTheme.inputLabel, theme.key));
+        SettingsManager.addStyleClass("popup-input", getModifier(baseTheme.popupInput, theme.key));
+        SettingsManager.addStyleClass("apply", getModifier(baseTheme.applyBtn, theme.key));
         Array.from(document.getElementsByClassName("close")).forEach((img) => { img.setAttribute("src", getModifier(baseTheme.attributes.closeSrc, theme.key) + baseTheme.attributes.closeImgType) });
-        WhiteboardSettings.addStyleClass("prompt", getModifier(baseTheme.prompt, theme.key));
+        SettingsManager.addStyleClass("prompt", getModifier(baseTheme.prompt, theme.key));
         document.getElementById("draggable-selectable-field").classList.add(getModifier(baseTheme.draggableField, theme.key));
     },
 
 };
 
-window.WhiteboardSettings = WhiteboardSettings || {};
+window.SettingsManager = SettingsManager || {};
 
-WhiteboardSettings.Themes.selectedTheme = WhiteboardSettings.Themes.CHARCOAL;
+SettingsManager.Themes.selectedTheme = SettingsManager.Themes.CHARCOAL;

@@ -235,7 +235,7 @@ var Whiteboard = {
             // #region dragging functionality
  
             this.div.onmouseover = (event) => {
-                if (Whiteboard.editingMode) { event.target.style.cursor = "move" } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON || this.configuration.type === Whiteboard.WhiteboardDraggable.Types.TOGGLE) { event.target.style.cursor = "pointer"; if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON) event.target.style.background = WhiteboardSettings.Themes.selectedTheme.attributes.nodeHover } else { event.target.style.cursor = "auto" }
+                if (Whiteboard.editingMode) { event.target.style.cursor = "move" } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON || this.configuration.type === Whiteboard.WhiteboardDraggable.Types.TOGGLE) { event.target.style.cursor = "pointer"; if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON) event.target.style.background = SettingsManager.Themes.selectedTheme.attributes.nodeHover } else { event.target.style.cursor = "auto" }
             }
 
             this.div.onmouseleave = (event) => { event.target.style.background = this.configuration.color }
@@ -247,7 +247,9 @@ var Whiteboard = {
             this.whiteboard.appendChild(this.container);
             this.label.setAttribute("type", "text");
             this.label.className = "whiteboard-label";
-            this.label.style.background = WhiteboardSettings.Themes.selectedTheme.attributes.draggableLabelColor;
+            this.label.style.background = SettingsManager.Themes.selectedTheme.attributes.draggableLabelBackground;
+            this.label.style.borderColor = SettingsManager.Themes.selectedTheme.attributes.draggableLabelColor;
+            this.label.style.color = SettingsManager.Themes.selectedTheme.attributes.draggableLabelColor;
             this.label.placeholder = "Untitled";
             this.label.value = this.configuration.name;
             this.container.appendChild(this.label);
@@ -302,7 +304,7 @@ var Whiteboard = {
             this.selectorContainer.innerHTML = "";
             this.selectableGroup = new Popup.SelectableGroup();
             for (let i = 0; i < selectableNames.length; i++) {
-                this.selectableGroup.add(new Popup.Selectable(selectableNames[i], (() => { this.configuration.state = selectableNames[i]; this.setLastUpdate(); this.sendState() }).bind(this), WhiteboardSettings.Themes.selectedTheme.draggableUnselect, WhiteboardSettings.Themes.selectedTheme.draggableSelect, true));
+                this.selectableGroup.add(new Popup.Selectable(selectableNames[i], (() => { this.configuration.state = selectableNames[i]; this.setLastUpdate(); this.sendState() }).bind(this), SettingsManager.Themes.selectedTheme.draggableUnselect, SettingsManager.Themes.selectedTheme.draggableSelect, true));
             }
             this.selectableGroup.generateHTML(this.selectorContainer);
         }
@@ -860,7 +862,7 @@ var Whiteboard = {
         return parseInt(draggable.getAttribute("index"));
     },
 
-    addDefaultDraggable: function () {
+    addDefaultNode: function () {
         Whiteboard.logChange();
         let configuration = {
             "name": "",

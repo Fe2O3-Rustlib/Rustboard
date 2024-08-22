@@ -85,12 +85,12 @@ var Popup = {
             this.group = null;
             this.name = name;
             if (unselectedStyle == undefined || unselectedStyle == null) {
-                this.unselectedStyle = "default-selectable " + WhiteboardSettings.Themes.selectedTheme.defaultSelectable;
+                this.unselectedStyle = "default-selectable " + SettingsManager.Themes.selectedTheme.defaultSelectable;
             } else {
                 this.unselectedStyle = unselectedStyle;
             }
             if (selectedStyle == undefined || selectedStyle == null) {
-                this.selectedStyle = "default-selectable-selected " + WhiteboardSettings.Themes.selectedTheme.defaultSelectableSelected;
+                this.selectedStyle = "default-selectable-selected " + SettingsManager.Themes.selectedTheme.defaultSelectableSelected;
             } else {
                 this.selectedStyle = selectedStyle;
             }

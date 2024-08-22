@@ -69,7 +69,7 @@ var Socket = {
             Socket.log = log;
         }
         try {
-            Socket.websocket = new WebSocket("ws://192.168.43.1:5801"/*WhiteboardSettings.websocketURL*/);
+            Socket.websocket = new WebSocket(SettingsManager.websocketURL);
         } catch {
             console.error("Error creating websocket")
         }

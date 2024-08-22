@@ -9,8 +9,7 @@ function inFullScreen() {
 }
 
 function initialize() { // This is called when the body portion of the html document loads
-    Load.loadSettings();
-
+    SettingsManager.loadSettings();
     if (!localStorage.getItem("webdashboard-layout:default")) {
         Load.defaultSave();
         console.warn("It looks like this is your first time using the dashboard in this browser.  Welcome!");
@@ -43,9 +42,9 @@ function initialize() { // This is called when the body portion of the html docu
 
     Popup.populatePopupClickableList(document.getElementById("select-type-container"), draggableTypes, (iterable) => iterable, (iterable) => { return () => PopupTasks.setType(iterable) });
 
-    Popup.populateVerticalInputs(document.getElementById("websocket-info-wrapper"), new Popup.PopupInput("dashboard_0", "dashboard id", "dashboard-id"), new Popup.PopupInput("21865", "team number", "team-number"), new Popup.PopupInput("ws://192.168.43.1:5837", "websocket url", "websocket-url"));
+    Popup.populateVerticalInputs(document.getElementById("websocket-info-wrapper"), new Popup.PopupInput("21865", "team number", "team-number"), new Popup.PopupInput("ws://192.168.43.1:5837", "websocket url", "websocket-url"));
     let themeWrapper = document.getElementById("theme-wrapper");
-    let themes = [new Popup.Selectable("Mr. Blue", () => WhiteboardSettings.Themes.selectedTheme = WhiteboardSettings.Themes.MR_BLUE, null, null, true), new Popup.Selectable("Charcoal", () => WhiteboardSettings.Themes.selectedTheme = WhiteboardSettings.Themes.CHARCOAL, null, null, true), new Popup.Selectable("Snow", () => WhiteboardSettings.Themes.selectedTheme = WhiteboardSettings.Themes.LIGHT, null, null, true)];
+    let themes = [new Popup.Selectable("Mr. Blue", () => SettingsManager.Themes.selectedThemeName = "MR_BLUE", null, null, true), new Popup.Selectable("Charcoal", () => SettingsManager.Themes.selectedThemeName = "CHARCOAL", null, null, true), new Popup.Selectable("Snow", () => SettingsManager.Themes.selectedThemeName = "LIGHT", null, null, true)];
     let group = new Popup.SelectableGroup();
     themes.forEach((theme) => group.add(theme));
     group.generateHTML(themeWrapper);
@@ -63,8 +62,8 @@ function initialize() { // This is called when the body portion of the html docu
 
     Popup.initializePopups();
 
+    SettingsManager.setTheme();
     Load.openJSONLayout("webdashboard-layout:default");
-    WhiteboardSettings.setTheme();
 }
 
 function addEventListeners() {
@@ -91,7 +90,7 @@ function addEventListeners() {
                 }
             } else if (event.key === "q" && Whiteboard.editingMode) {
                 event.preventDefault();
-                Whiteboard.addDefaultDraggable();
+                Whiteboard.addDefaultNode();
             }
         }
     });
@@ -133,7 +132,7 @@ function generateContextMenuButton(parent, name, onclick) {
             removeMenu();
         }
     };
-    anchor.classList.add("menu-button", WhiteboardSettings.Themes.selectedTheme.menuBtn);
+    anchor.classList.add("menu-button", SettingsManager.Themes.selectedTheme.menuBtn);
     parent.appendChild(anchor);
 }
 
