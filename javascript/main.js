@@ -33,6 +33,7 @@ function initialize() { // This is called when the body portion of the html docu
     Popup.generateSimpleInputPopup("text-telemetry-font-size-setter", PopupTasks.setFontSize, new Popup.PopupInput("15", "font size"));
     Popup.generateSimpleInputPopup("path-timeout-setter", PopupTasks.setPathTimeout, new Popup.PopupInput("10000", "path timeout (milliseconds)"));
     Popup.generateSimpleInputPopup("distance-to-pixels-setter", PopupTasks.setDistanceToPixels, new Popup.PopupInput(5, "distance to pixels constant"));
+    Popup.generateSimpleInputPopup("stream-update-setter", PopupTasks.setStreamUpdateFrequency, new Popup.PopupInput(10, "stream update rate (Hz)"));
     Popup.setOnOpen("path-timeout-setter", PopupTasks.populatePathTimeout);
 
     Popup.setOnOpen("stream-url-setter", () => Popup.getInput("stream-url-input").value = Whiteboard.currentNode.configuration.streamURL);
@@ -192,6 +193,7 @@ function generateContextMenu(event) {
                 }
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.CAMERA_STREAM)) {
                     generateContextMenuButton(container, "set stream url", () => Popup.openPopup("stream-url-setter"));
+                    generateContextMenuButton(container, "set update Hz", () => Popup.openPopup("stream-update-setter"));
                     generateContextMenuButton(container, "set stream size", () => Popup.openPopup("stream-size-setter"));
                 }
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.PATH)) {

@@ -30,8 +30,12 @@ var PopupTasks = {
         size = size.split(/[Xx]/);
         width = parseInt(size[0]);
         height = parseInt(size[1]);
-        Whiteboard.currentNode.setSize(new Positioning.Vector2d(width, height));
-        Popup.closePopup(popup);
+        if (isNaN(width) || isNaN(height)) {
+            Notify.createNotice("Invalid node size", "negative", 5000);
+        } else {
+            Whiteboard.currentNode.setSize(new Positioning.Vector2d(width, height));
+            Popup.closePopup(popup);
+        }
     },
 
     setPosition: function (event) {
@@ -39,8 +43,12 @@ var PopupTasks = {
         let popup = Popup.getPopupFromChild(event.target);
         const x = parseInt(document.getElementById("x-pose-input").getElementsByClassName("popup-input")[0].value);
         const y = parseInt(document.getElementById("y-pose-input").getElementsByClassName("popup-input")[0].value);
-        Whiteboard.currentNode.setPosition(new Positioning.Vector2d(x, y));
-        Popup.closePopup(popup);
+        if (isNaN(x) || isNaN(y)) {
+            Notify.createNotice("Invalid position", "negative", 5000);
+        } else {
+            Whiteboard.currentNode.setPosition(new Positioning.Vector2d(x, y));
+            Popup.closePopup(popup);
+        }
     },
 
     setType: function (type) {
@@ -82,16 +90,35 @@ var PopupTasks = {
         size = size.split(/[Xx]/);
         width = parseInt(size[0]);
         height = parseInt(size[1]);
-        Whiteboard.currentNode.setStreamSize(new Positioning.Vector2d(width, height));
-        Popup.closePopup(popup);
+        if (isNaN(width) || isNaN(height)) {
+            Notify.createNotice("Invalid stream size", "negative", 5000);
+        } else {
+            Whiteboard.currentNode.setStreamSize(new Positioning.Vector2d(width, height));
+            Popup.closePopup(popup);
+        }
+    },
+
+    setStreamUpdateFrequency: function(event) {
+        let popup = Popup.getPopupFromChild(event.target);
+        let updateFrequency = parseFloat(popup.getElementsByClassName("popup-input")[0].value);
+        if (isNaN(updateFrequency)) {
+            Notify.createNotice("Invalid frequency", "negative", 5000);
+        } else {
+            Whiteboard.currentNode.setStreamUpdatePeriod(1000 / updateFrequency);
+            Popup.closePopup(popup);
+        }
     },
 
     setFontSize: function(event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
         let size = popup.getElementsByClassName("popup-input")[0].value;
-        Whiteboard.currentNode.setFontSize(size);
-        Popup.closePopup(popup);
+        if (isNaN(parseInt(size))) {
+            Notify.createNotice("Invalid font size", "negative", 5000);
+        } else {
+            Whiteboard.currentNode.setFontSize(size);
+            Popup.closePopup(popup);
+        }
     },
 
     setWhiteBoardBorderSize: function (event) {

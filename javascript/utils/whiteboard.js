@@ -215,6 +215,8 @@ var Whiteboard = {
             this.setSize(configuration.size, false);
             this.setFontSize(configuration.fontSize);
             this.setColor(configuration.color);
+            this.configuration.streamURL = getValue(configuration.streamURL, "http://192.168.43.1:10000");
+            this.configuration.streamRequestPeriod = getValue(configuration.streamRequestPeriod, 100);
             this.setStreamSize(configuration.streamSize);
             this.selectableGroup = null;
             this.configuration.selectableNames = configuration.selectableNames;
@@ -292,10 +294,22 @@ var Whiteboard = {
             this.setLastUpdate = this.setLastUpdate.bind(this);
             this.copy = this.copy.bind(this);
             this.drawGraph = this.drawGraph.bind(this);
+            this.refreshCameraStream = this.refreshCameraStream.bind(this);
         }
 
         setLastUpdate() {
             this.configuration.last_node_update = Date.now();
+        }
+
+        refreshCameraStream() {
+            if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.CAMERA_STREAM) {
+                this.stream.src = `${this.configuration.streamURL}?timestamp=${Date.now()}`;
+                setTimeout(this.refreshCameraStream, this.configuration.streamRequestPeriod);
+            }
+        }
+
+        setStreamUpdatePeriod(periodMS) {
+            this.configuration.streamRequestPeriod = periodMS;
         }
 
         generateSelectorHTML(selectableNames) {
@@ -788,6 +802,7 @@ var Whiteboard = {
             } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.CAMERA_STREAM) {
                 this.stream.style.display = "block";
                 this.setStreamURL(this.configuration.streamURL);
+                this.refreshCameraStream();
             } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.GRAPH) {
                 this.setColor("gray");
                 this.canvas.style.display = "block";
