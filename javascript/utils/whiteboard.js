@@ -361,13 +361,13 @@ var Whiteboard = {
                         y = Positioning.round(parseFloat(state.match(/y:-?[0-9.]*/)[0].replace("y:", "")), 4);
                         heading = parseFloat(state.match(/heading:-?[0-9.]*/)[0].replace("heading:", ""));
                     } catch {
-                        Notify.createNotice("Failed to parse robot position data", "negative", 3000)
+                        Notify.createNotice("Failed to parse robot position data", Notify.NEGATIVE, 3000)
                     }
                     this.drawGraph(x, y, heading);
                 }
             } catch (err) {
                 console.warn(err);
-                Notify.createNotice("Could not apply draggable state", "negative", 2000);
+                Notify.createNotice("Could not apply draggable state", Notify.NEGATIVE, 2000);
             }
         }
 
@@ -667,7 +667,7 @@ var Whiteboard = {
 
         copy() {
             localStorage.setItem("copiedNode", JSON.stringify(this.configuration));
-            Notify.createNotice("copied", "positive", 3000);
+            Notify.createNotice("copied", Notify.POSITIVE, 3000);
         }
 
         setSize(size, restrictSize = true) {

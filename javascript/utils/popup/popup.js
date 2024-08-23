@@ -1,4 +1,7 @@
 var Popup = {
+
+    POPUP_INPUT_CLASSNAME: "popup-input",
+
     openPopup: function (id) {
         let popup = document.getElementById(id);
 
@@ -151,7 +154,7 @@ var Popup = {
             let input = document.createElement("input");
             input.setAttribute("type", "text");
             input.setAttribute("placeholder", this.placeholder);
-            input.setAttribute("class", "popup-input");
+            input.setAttribute("class", Popup.POPUP_INPUT_CLASSNAME);
             inputWrapper.appendChild(input);
         }
     },
@@ -178,7 +181,7 @@ var Popup = {
             cls.addEventListener("click", () => { Popup.closePopup(Popup.getPopupFromChild(cls)) });
             popups[i].appendChild(cls);
         }
-        let inputs = document.getElementsByClassName("popup-input");
+        let inputs = document.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME);
         for (let i = 0; i < inputs.length; i++) {
             inputs[i].addEventListener("keydown", (event) => { if (event.key === "Enter" && document.activeElement === inputs[i]) Popup.getPopupFromChild(event.target).getElementsByClassName("apply")[0].click() });
         }
@@ -214,15 +217,15 @@ var Popup = {
     },
 
     getInput: function (wrapperId) {
-        return document.getElementById(wrapperId).getElementsByClassName("popup-input")[0];
+        return document.getElementById(wrapperId).getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0];
     },
 
     getInputValue: function (wrapperId) {
-        return document.getElementById(wrapperId).getElementsByClassName("popup-input")[0].value;
+        return document.getElementById(wrapperId).getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
     },
 
     setInputValue: function (wrapperId, value) {
-        document.getElementById(wrapperId).getElementsByClassName("popup-input")[0].value = value;
+        document.getElementById(wrapperId).getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value = value;
     },
 
     popupBackground: null,

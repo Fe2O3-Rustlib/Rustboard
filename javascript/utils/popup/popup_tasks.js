@@ -2,12 +2,12 @@ var PopupTasks = {
     changeID: function (event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
-        let id = popup.getElementsByClassName("popup-input")[0].value;
+        let id = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         if (Whiteboard.visibleNodeWithId(id)) {
-            Notify.createNotice("Nodes within the same layout cannot have the same id", "negative", 5000);
+            Notify.createNotice("Nodes within the same layout cannot have the same id", Notify.NEGATIVE, 5000);
             return;
         } else if (Whiteboard.unlinkedNodeWithId(id)) {
-            Notify.createNotice("Nodes that have equal ids and are in different layouts must have the same type", "negative", 5000);
+            Notify.createNotice("Nodes that have equal ids and are in different layouts must have the same type", Notify.NEGATIVE, 5000);
             return;
         }
         Whiteboard.currentNode.setId(id);
@@ -18,7 +18,7 @@ var PopupTasks = {
     changeColor: function (event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
-        let color = popup.getElementsByClassName("popup-input")[0].value;
+        let color = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         Whiteboard.currentNode.setColor(color);
         Popup.closePopup(popup);
     },
@@ -26,12 +26,12 @@ var PopupTasks = {
     setDraggableSize: function (event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
-        let size = popup.getElementsByClassName("popup-input")[0].value;
+        let size = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         size = size.split(/[Xx]/);
         width = parseInt(size[0]);
         height = parseInt(size[1]);
         if (isNaN(width) || isNaN(height)) {
-            Notify.createNotice("Invalid node size", "negative", 5000);
+            Notify.createNotice("Invalid node size", Notify.NEGATIVE, 5000);
         } else {
             Whiteboard.currentNode.setSize(new Positioning.Vector2d(width, height));
             Popup.closePopup(popup);
@@ -41,10 +41,10 @@ var PopupTasks = {
     setPosition: function (event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
-        const x = parseInt(document.getElementById("x-pose-input").getElementsByClassName("popup-input")[0].value);
-        const y = parseInt(document.getElementById("y-pose-input").getElementsByClassName("popup-input")[0].value);
+        const x = parseInt(document.getElementById("x-pose-input").getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value);
+        const y = parseInt(document.getElementById("y-pose-input").getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value);
         if (isNaN(x) || isNaN(y)) {
-            Notify.createNotice("Invalid position", "negative", 5000);
+            Notify.createNotice("Invalid position", Notify.NEGATIVE, 5000);
         } else {
             Whiteboard.currentNode.setPosition(new Positioning.Vector2d(x, y));
             Popup.closePopup(popup);
@@ -71,14 +71,14 @@ var PopupTasks = {
             Whiteboard.currentNode.generateSelectorHTML(names);
             Popup.closePopup(popup);
         } catch {
-            Notify.createNotice("Illegal input!", "negative", 3000);
+            Notify.createNotice("Illegal input!", Notify.NEGATIVE, 3000);
         }
     },
 
     setStreamURL: function (event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
-        let url = popup.getElementsByClassName("popup-input")[0].value;
+        let url = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         Whiteboard.currentNode.setStreamURL(url);
         Popup.closePopup(popup);
     },
@@ -86,12 +86,12 @@ var PopupTasks = {
     setStreamSize: function (event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
-        let size = popup.getElementsByClassName("popup-input")[0].value;
+        let size = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         size = size.split(/[Xx]/);
         width = parseInt(size[0]);
         height = parseInt(size[1]);
         if (isNaN(width) || isNaN(height)) {
-            Notify.createNotice("Invalid stream size", "negative", 5000);
+            Notify.createNotice("Invalid stream size", Notify.NEGATIVE, 5000);
         } else {
             Whiteboard.currentNode.setStreamSize(new Positioning.Vector2d(width, height));
             Popup.closePopup(popup);
@@ -100,9 +100,9 @@ var PopupTasks = {
 
     setStreamUpdateFrequency: function(event) {
         let popup = Popup.getPopupFromChild(event.target);
-        let updateFrequency = parseFloat(popup.getElementsByClassName("popup-input")[0].value);
+        let updateFrequency = parseFloat(popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value);
         if (isNaN(updateFrequency)) {
-            Notify.createNotice("Invalid frequency", "negative", 5000);
+            Notify.createNotice("Invalid frequency", Notify.NEGATIVE, 5000);
         } else {
             Whiteboard.currentNode.setStreamUpdatePeriod(1000 / updateFrequency);
             Popup.closePopup(popup);
@@ -112,9 +112,9 @@ var PopupTasks = {
     setFontSize: function(event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
-        let size = popup.getElementsByClassName("popup-input")[0].value;
+        let size = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         if (isNaN(parseInt(size))) {
-            Notify.createNotice("Invalid font size", "negative", 5000);
+            Notify.createNotice("Invalid font size", Notify.NEGATIVE, 5000);
         } else {
             Whiteboard.currentNode.setFontSize(size);
             Popup.closePopup(popup);
@@ -124,7 +124,7 @@ var PopupTasks = {
     setWhiteBoardBorderSize: function (event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
-        let size = popup.getElementsByClassName("popup-input")[0].value;
+        let size = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         size = size.split(/[Xx]/);
         let border = document.getElementById("whiteboard-border");
         border.style.width = Positioning.toHTMLPositionPX(size[0]);
@@ -140,7 +140,7 @@ var PopupTasks = {
             toBeRenamed = Popup.selected.innerHTML;
         }
         let popup = Popup.getPopupFromChild(event.target);
-        let name = popup.getElementsByClassName("popup-input")[0].value;
+        let name = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         try {
             let layoutNames = Load.listLayoutNames();
             let duplicateName = false;
@@ -150,7 +150,7 @@ var PopupTasks = {
                 }
             }
             if (duplicateName) {
-                Notify.createNotice("That layout name already exists!", "negative", 2500);
+                Notify.createNotice("That layout name already exists!", Notify.NEGATIVE, 2500);
                 return;
             } else {
                 if (Load.currentLayout === toBeRenamed) {
@@ -164,7 +164,7 @@ var PopupTasks = {
 
         } catch (err) {
             console.log(err);
-            Notify.createNotice("Could not rename layout!  Try reloading the page.", "negative", 2500);
+            Notify.createNotice("Could not rename layout!  Try reloading the page.", Notify.NEGATIVE, 2500);
         }
         Popup.closePopup(popup);
     },
@@ -194,22 +194,22 @@ var PopupTasks = {
 
     populatePathTimeout() {
         if (Whiteboard.currentNode.configuration.followTimeout != undefined)  {
-            document.getElementById("path-timeout-setter").getElementsByClassName("popup-input")[0].value = Whiteboard.currentNode.configuration.followTimeout;
+            document.getElementById("path-timeout-setter").getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value = Whiteboard.currentNode.configuration.followTimeout;
         }
     },
 
     setPathTimeout() {
         let popup = Popup.getPopupFromChild(event.target);
-        let timeout = popup.getElementsByClassName("popup-input")[0].value;
+        let timeout = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         Whiteboard.currentNode.configuration.followTimeout = timeout;
         Popup.closePopup(popup);
     },
 
     setDistanceToPixels: function() {
         let popup = Popup.getPopupFromChild(event.target);
-        let distanceToPixels = parseFloat(popup.getElementsByClassName("popup-input")[0].value);
+        let distanceToPixels = parseFloat(popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value);
         if (isNaN(distanceToPixels)) {
-            Notify.createNotice("Not a number", "negative", 5000);
+            Notify.createNotice("Not a number", Notify.NEGATIVE, 5000);
         } else {
             Whiteboard.currentNode.configuration.distanceToPixels = distanceToPixels;
             Popup.closePopup(popup);

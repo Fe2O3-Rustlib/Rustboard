@@ -1,5 +1,5 @@
-window.getModifier = function (baseClass, key) {
-    return baseClass + key;
+window.getModifier = function (baseClass, suffix) {
+    return baseClass + suffix;
 };
 
 var SettingsManager = {
@@ -27,33 +27,10 @@ var SettingsManager = {
             defaultSelectableSelected: "default-selectable-selected",
             draggableUnselect: "draggable-unselect",
             draggableSelect: "draggable-select",
-            attributes: {
-                closeSrc: "./images/close",
-                closeImgType: ".svg",
-                nodeHover: "black",
-                draggableLabelColor: "white",
-            }
         },
 
         MR_BLUE: {
-            key: "-blue",
-            defaultText: "default-text-blue",
-            menu: "menu-blue",
-            menuTransition: "transition-blue",
-            whiteboard: "whiteboard-blue",
-            menuBtn: "menu-button-blue",
-            layoutName: "layout-name-container-blue",
-            layoutNameTxt: "layout-name-blue",
-            popup: "popup-blue",
-            inputLabel: "input-label-blue",
-            popupInput: "popup-input-blue",
-            applyBtn: "apply-blue",
-            prompt: "prompt-blue",
-            draggableField: "draggable-selectable-field-blue",
-            defaultSelectable: "default-selectable-blue",
-            defaultSelectableSelected: "default-selectable-selected-blue",
-            draggableUnselect: "draggable-unselect-blue",
-            draggableSelect: "draggable-select-blue",
+            suffix: "-blue",
             attributes: {
                 closeSrc: "./images/close-blue.svg",
                 nodeHover: "black",
@@ -62,24 +39,7 @@ var SettingsManager = {
             }
         },
         CHARCOAL: {
-            key: "-dark",
-            defaultText: "default-text-dark",
-            menu: "menu-dark",
-            menuTransition: "transition-dark",
-            whiteboard: "whiteboard-dark",
-            menuBtn: "menu-button-dark",
-            layoutName: "layout-name-container-dark",
-            layoutNameTxt: "layout-name-dark",
-            popup: "popup-dark",
-            inputLabel: "input-label-dark",
-            popupInput: "popup-input-dark",
-            applyBtn: "apply-dark",
-            prompt: "prompt-dark",
-            draggableField: "draggable-selectable-field-dark",
-            defaultSelectable: "default-selectable-dark",
-            defaultSelectableSelected: "default-selectable-selected-dark",
-            draggableUnselect: "draggable-unselect-dark",
-            draggableSelect: "draggable-select-dark",
+            suffix: "-dark",
             attributes: {
                 closeSrc: "./images/close-dark.svg",
                 nodeHover: "black",
@@ -88,24 +48,7 @@ var SettingsManager = {
             }
         },
         LIGHT: {
-            key: "-light",
-            defaultText: "default-text-light",
-            menu: "menu-light",
-            menuTransition: "transition-light",
-            whiteboard: "whiteboard-light",
-            menuBtn: "menu-button-light",
-            layoutName: "layout-name-container-light",
-            layoutNameTxt: "layout-name-light",
-            popup: "popup-light",
-            inputLabel: "input-label-light",
-            popupInput: "popup-input-light",
-            applyBtn: "apply-light",
-            prompt: "prompt-light",
-            draggableField: "draggable-selectable-field-light",
-            defaultSelectable: "default-selectable-light",
-            defaultSelectableSelected: "default-selectable-selected-light",
-            draggableUnselect: "draggable-unselect-light",
-            draggableSelect: "draggable-select-light",
+            suffix: "-light",
             attributes: {
                 closeSrc: "./images/close-light.svg",
                 nodeHover: "black",
@@ -140,6 +83,12 @@ var SettingsManager = {
         SettingsManager.websocketURL = getValue(storedSettings.websocketURL, "ws://192.168.43.1:5801");
         SettingsManager.Themes.selectedThemeName = getValue(storedSettings.selectedThemeName, "CHARCOAL");
         SettingsManager.Themes.selectedTheme = SettingsManager.Themes[SettingsManager.Themes.selectedThemeName];
+        let theme = SettingsManager.Themes.selectedTheme;
+        let baseTheme = SettingsManager.Themes.BASE;
+        let keys = Object.keys(baseTheme);
+        for (let i = 0; i < keys.length; i++) {
+            theme[keys[i]] = baseTheme[keys[i]] + theme.suffix;
+        }
     },
 
     populateSettingsInfo: function () {
@@ -157,33 +106,25 @@ var SettingsManager = {
         }
     },
 
-    WhiteboardTheme: class {
-        constructor(key, attributes) {
-            this.key = key;
-            this.attributes = attributes;
-        }
-    },
-
     setTheme: function () {
         let theme = SettingsManager.Themes.selectedTheme;
-        let baseTheme = SettingsManager.Themes.BASE;
-        SettingsManager.addStyleClass("default-text", getModifier(baseTheme.defaultText, theme.key));
-        document.getElementById("menu").classList.add(getModifier(baseTheme.menu, theme.key));
-        document.getElementById("transition").classList.add(getModifier(baseTheme.menuTransition, theme.key));
-        document.getElementById("whiteboard").classList.add(getModifier(baseTheme.whiteboard, theme.key));
-        SettingsManager.addStyleClass("menu-button", getModifier(baseTheme.menuBtn, theme.key));
-        SettingsManager.addStyleClass("dropdown-button", getModifier(baseTheme.menuBtn, theme.key));
-        SettingsManager.addStyleClass("dropdown", getModifier(baseTheme.menuBtn, theme.key));
-        SettingsManager.addStyleClass("dropdown-option", getModifier(baseTheme.menuBtn, theme.key));
-        document.getElementById("layout-name-container").classList.add(getModifier(baseTheme.layoutName, theme.key));
-        document.getElementById("layout-name").classList.add(getModifier(baseTheme.layoutNameTxt, theme.key));
-        SettingsManager.addStyleClass("popup", getModifier(baseTheme.popup, theme.key));
-        SettingsManager.addStyleClass("input-label", getModifier(baseTheme.inputLabel, theme.key));
-        SettingsManager.addStyleClass("popup-input", getModifier(baseTheme.popupInput, theme.key));
-        SettingsManager.addStyleClass("apply", getModifier(baseTheme.applyBtn, theme.key));
-        Array.from(document.getElementsByClassName("close")).forEach((img) => { img.setAttribute("src", getModifier(baseTheme.attributes.closeSrc, theme.key) + baseTheme.attributes.closeImgType) });
-        SettingsManager.addStyleClass("prompt", getModifier(baseTheme.prompt, theme.key));
-        document.getElementById("draggable-selectable-field").classList.add(getModifier(baseTheme.draggableField, theme.key));
+        SettingsManager.addStyleClass("default-text", theme.defaultText);
+        document.getElementById("menu").classList.add(theme.menu);
+        document.getElementById("transition").classList.add(theme.menuTransition);
+        document.getElementById("whiteboard").classList.add(theme.whiteboard);
+        SettingsManager.addStyleClass("menu-button", theme.menuBtn);
+        SettingsManager.addStyleClass("dropdown-button", theme.menuBtn);
+        SettingsManager.addStyleClass("dropdown", theme.menuBtn);
+        SettingsManager.addStyleClass("dropdown-option", theme.menuBtn);
+        document.getElementById("layout-name-container").classList.add(theme.layoutName);
+        document.getElementById("layout-name").classList.add(theme.layoutNameTxt);
+        SettingsManager.addStyleClass("popup", theme.popup);
+        SettingsManager.addStyleClass("input-label", theme.inputLabel);
+        SettingsManager.addStyleClass("popup-input", theme.popupInput);
+        SettingsManager.addStyleClass("apply", theme.applyBtn);
+        Array.from(document.getElementsByClassName("close")).forEach((img) => { img.setAttribute("src", theme.attributes.closeSrc) });
+        SettingsManager.addStyleClass("prompt", theme.prompt);
+        document.getElementById("draggable-selectable-field").classList.add(theme.draggableField);
     },
 
 };

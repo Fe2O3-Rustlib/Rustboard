@@ -23,7 +23,7 @@ var Load = {
                 localStorage.removeItem(key);
             }
         } catch {
-            Notify.createNotice("Could not remove layout!  Try reloading the page.", "negative");
+            Notify.createNotice("Could not remove layout!  Try reloading the page.", Notify.NEGATIVE);
         }
     },
 
@@ -80,7 +80,7 @@ var Load = {
             Load.getDraggableName(Whiteboard.layoutNodeRegistry[i]);
         }
         localStorage.setItem(`webdashboard-layout:${Load.currentLayout}`, Load.getLayoutJSONString());
-        if (notify) Notify.createNotice("Layout saved", "positive", 3000);
+        if (notify) Notify.createNotice("Layout saved", Notify.POSITIVE, 3000);
     },
 
     newLayout: function () {
@@ -150,7 +150,7 @@ var Load = {
             Load.openJSON(data);
         } catch (err) {
             console.warn(err);
-            Notify.createNotice("Could not open layout!", "negative", 5000);
+            Notify.createNotice("Could not open layout!", Notify.NEGATIVE, 5000);
         }
     },
 
@@ -272,16 +272,16 @@ var Load = {
         }
         try {
             navigator.clipboard.writeText(data);
-            Notify.createNotice("Copied layout JSON to clipboard", "positive", 3000);
+            Notify.createNotice("Copied layout JSON to clipboard", Notify.POSITIVE, 3000);
         } catch {
-            Notify.createNotice("Could not export layout JSON", "negative", 3000);
+            Notify.createNotice("Could not export layout JSON", Notify.NEGATIVE, 3000);
         }
     },
 
     pasteNode: function() {
         let copiedNode = localStorage.getItem("copiedNode");
         if (copiedNode == undefined) {
-            Notify.createNotice("Nothing to copy ¯\_(ツ)_/¯", "negative", 5000);
+            Notify.createNotice("Nothing to copy ¯\_(ツ)_/¯", Notify.NEGATIVE, 5000);
         } else {
             Whiteboard.logChange();
             nodeConfiguration = JSON.parse(copiedNode);
@@ -298,7 +298,7 @@ var Load = {
         let popup = Popup.getPopupFromChild(event.target);
         let name = document.getElementById("import-layout-name").getElementsByClassName("popup-input")[0].value;
         if (name === "") {
-            Notify.createNotice("Illegal layout name", "negative", 3000);
+            Notify.createNotice("Illegal layout name", Notify.NEGATIVE, 3000);
             return;
         }
         let json = document.getElementById("import-layout-json").getElementsByClassName("popup-input")[0].value;
@@ -307,7 +307,7 @@ var Load = {
             Load.openJSON(json);
             Load.updateCurrentLayout(name);
         } catch {
-            Notify.createNotice("Could not open layout - Invalid JSON", "negative", 3000);
+            Notify.createNotice("Could not open layout - Invalid JSON", Notify.NEGATIVE, 3000);
         }
         Popup.closePopup(popup);
     },
@@ -321,10 +321,10 @@ var Load = {
             if (Load.currentLayout == "default") {
                 Load.openJSONLayout("webdashboard-layout:default");
             }
-            Notify.createNotice("Set the current layout as default", "positive", 3000);
+            Notify.createNotice("Set the current layout as default", Notify.POSITIVE, 3000);
         } catch (err) {
             console.warn(err);
-            Notify.createNotice("Could not set as default!", "negative", 3000);
+            Notify.createNotice("Could not set as default!", Notify.NEGATIVE, 3000);
         }
     },
 

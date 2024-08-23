@@ -13,7 +13,7 @@ function initialize() { // This is called when the body portion of the html docu
     if (!localStorage.getItem("webdashboard-layout:default")) {
         Load.defaultSave();
         console.warn("It looks like this is your first time using the dashboard in this browser.  Welcome!");
-        setTimeout(() => Notify.createNotice("Welcome!", "positive", 5000), 3000);
+        setTimeout(() => Notify.createNotice("Welcome!", Notify.POSITIVE, 5000), 3000);
     }
 
     Socket.initializeSocket();
@@ -161,7 +161,7 @@ function generateContextMenu(event) {
             generateContextMenuButton(container, "configure", () => Popup.openPopup("path-point-configuration"));
         } else {
             if (node.isType(Whiteboard.WhiteboardDraggable.Types.TEXT_TELEMETRY)) {
-                generateContextMenuButton(container, "copy data", () => {navigator.clipboard.writeText(node.configuration.state); Notify.createNotice("copied", "positive", 3000)});
+                generateContextMenuButton(container, "copy data", () => {navigator.clipboard.writeText(node.configuration.state); Notify.createNotice("copied", Notify.POSITIVE, 3000)});
             }
             if (Whiteboard.editingMode) {
                 generateContextMenuButton(container, "remove", () => { if (Whiteboard.editingMode) { Whiteboard.logChange(); node.delete() } });
@@ -244,7 +244,7 @@ function enterFullScreen() {
     if (Whiteboard.editingMode) Whiteboard.toggleEditingMode();
     isFullScreen = true;
     document.getElementById("menu").style.display = "none";
-    Notify.createNotice("Press f11 to exit full screen", "neutral", 4000);
+    Notify.createNotice("Press f11 to exit full screen", Notify.NEUTRAL, 4000);
 }
 
 function exitFullScreen() {

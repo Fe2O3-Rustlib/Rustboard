@@ -1,4 +1,9 @@
 var Notify = {
+
+    POSITIVE: "positive",
+    NEUTRAL: "neutral",
+    NEGATIVE: "negative",
+
     Notice: class {
         constructor(message, type, duration) {
             let activeNotices = document.querySelectorAll(".notice-container");
@@ -6,9 +11,9 @@ var Notify = {
                 activeNotices[i].remove();
             }
             let color = "gray";
-            if (type === "positive") {
+            if (type === Notify.POSITIVE) {
                 color = "limegreen";
-            } else if (type === "negative") {
+            } else if (type === Notify.NEGATIVE) {
                 color = "red";
             }
             this.message = message;

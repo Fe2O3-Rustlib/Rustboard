@@ -451,6 +451,7 @@ body {
     display: inline;
     overflow: auto;
     background-color: #39303b;
+    border: 5px solid #39303b;
 }
 
 .log-entry {
