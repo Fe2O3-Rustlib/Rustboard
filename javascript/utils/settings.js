@@ -56,6 +56,15 @@ var SettingsManager = {
                 draggableLabelColor: "#aeaeae",
             }
         },
+        SLAY: {
+            suffix: "-pink",
+            attributes: {
+                closeSrc: "./images/close-pink.svg",
+                nodeHover: "#ff3399",
+                draggableLabelBackground: "white",
+                draggableLabelColor: "#ff3399",
+            }
+        },
 
         selectedThemeName: null,
         selectedTheme: null

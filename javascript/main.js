@@ -45,7 +45,12 @@ function initialize() { // This is called when the body portion of the html docu
 
     Popup.populateVerticalInputs(document.getElementById("websocket-info-wrapper"), new Popup.PopupInput("21865", "team number", "team-number"), new Popup.PopupInput("ws://192.168.43.1:5837", "websocket url", "websocket-url"));
     let themeWrapper = document.getElementById("theme-wrapper");
-    let themes = [new Popup.Selectable("Mr. Blue", () => SettingsManager.Themes.selectedThemeName = "MR_BLUE", null, null, true), new Popup.Selectable("Charcoal", () => SettingsManager.Themes.selectedThemeName = "CHARCOAL", null, null, true), new Popup.Selectable("Snow", () => SettingsManager.Themes.selectedThemeName = "LIGHT", null, null, true)];
+    let themes = [
+        new Popup.Selectable("Mr. Blue", () => SettingsManager.Themes.selectedThemeName = "MR_BLUE", null, null, true),
+        new Popup.Selectable("Charcoal", () => SettingsManager.Themes.selectedThemeName = "CHARCOAL", null, null, true),
+        new Popup.Selectable("Snow", () => SettingsManager.Themes.selectedThemeName = "LIGHT", null, null, true),
+        new Popup.Selectable("Slay", () => SettingsManager.Themes.selectedThemeName = "SLAY", null, null, true)
+    ];
     let group = new Popup.SelectableGroup();
     themes.forEach((theme) => group.add(theme));
     group.generateHTML(themeWrapper);
