@@ -3,8 +3,9 @@ var Socket = {
     lastMessageTimestamp: 0,
     connecting: false,
     connected: false,
-    log: "",
+    log: [],
     uuid: "",
+    logKey: "webdashboard-log",
 
     MessageActions: {
         requestClientDetails: "request_client_details",
@@ -14,11 +15,22 @@ var Socket = {
         createNotice: "create_notice",
         consoleLog: "console_log",
         consoleWarn: "console_warn",
-        clearLog: "clear_log",
-        log: "log"
+        newLog: "new_log",
+        logMessage: "log_entry"
+    },
+
+    JsonKeys: {
+
     },
 
     initializeSocket: function () {
+        if (localStorage.getItem(Socket.logKey) == undefined) {
+            let log = {
+                entries: []
+            };
+            localStorage.setItem(Socket.logKey, log);
+        }
+        Socket.displayAllLogEntries();
         Socket.sendRustboardDetails(); // Delete later
         loadedUUID = localStorage.getItem("uuid");
         if (loadedUUID == null) {
@@ -64,10 +76,6 @@ var Socket = {
     },
 
     openSocket: function (recursion) {
-        let log = localStorage.getItem("webdashboard-log");
-        if (log != undefined) {
-            Socket.log = log;
-        }
         try {
             Socket.websocket = new WebSocket(SettingsManager.websocketURL);
         } catch {
@@ -116,23 +124,53 @@ var Socket = {
             console.log(message.info);
         } else if (message.action === Socket.MessageActions.consoleWarn) {
             console.warn(message.info);
-        } else if (message.action === Socket.MessageActions.log) {
-            Socket.log += "\n" + message.value;
-            localStorage.setItem("webdashboard-log", Socket.log);
-        } else if (message.action === Socket.MessageActions.clearLog) {
-            Socket.log = "";
+        } else if (message.action === Socket.MessageActions.logMessage) {
+            let currentLog = JSON.parse(localStorage.getItem(Socket.logKey));
+            currentLog.entries.push(message.entry);
+            localStorage.setItem(Socket.logKey, JSON.stringify(currentLog));
+            Socket.displayLogEntry(message.entry);
+        } else if (message.action === Socket.MessageActions.newLog) {
+            localStorage.setItem(Socket.logKey, JSON.stringify(
+            {
+                entries: message.entries
+            }
+        ));
+        Socket.displayAllLogEntries();
         }
     },
 
-    downloadRobotLog: function() {
-        const file = new File([Socket.log], "log.txt", { type: 'text/plain' });
-        const fileUrl = URL.createObjectURL(file);
-        let anchor = document.createElement("a");
-        anchor.href = fileUrl;
-        anchor.target = "blank";
-        anchor.click();
-    }
+    displayAllLogEntries: function() {
+        let log = JSON.parse(localStorage.getItem(Socket.logKey));
+        document.getElementById("log-container").innerHTML = "";
+        if (log != undefined && log.entries != undefined) {
+            for (let i = 0; i < log.entries.length; i++) {
+                Socket.displayLogEntry(log.entries[i]);
+            }  
+        }
+    },
 
+    displayLogEntry: function(entry) {
+        let logContainer = document.getElementById("log-container");
+        let logPre = document.createElement("pre");
+        logPre.classList.add("log-entry");
+        let color;
+        if (entry.tag === "E") {
+            color = "red";
+        } else if (entry.tag === "W") {
+            color = "#ffc90e";
+        } else if (entry.tag === "M") {
+            color = "white";
+        }
+        logPre.style.color = color;
+        let innerHTML = (new Date(parseInt(entry["time"]))).toString() + " -------- ";
+        if (entry.has_json) {
+            innerHTML += JSON.stringify(entry.data);
+        } else {
+            innerHTML += entry.data;
+        }
+        logPre.innerHTML = innerHTML;
+        logContainer.appendChild(logPre);
+    }
 };
 
 window.Socket = Socket || {};

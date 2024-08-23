@@ -35,7 +35,7 @@
             <div class="dropdown">
                 <button class="dropdown-button">File</button>
                 <div class="dropdown-container">
-                    <a class="dropdown-option" id="log-downloader" onclick="Socket.downloadRobotLog()">robot log</a>
+                    <a class="dropdown-option" id="log-downloader" popup="logger-popup">robot log</a>
                     <a class="dropdown-option" onclick="Load.newLayout()">new layout</a>
                     <a class="dropdown-option" onclick="Load.defaultSave()" title="ctrl+s">save layout</a>
                     <a class="dropdown-option" popup="Load-layout-as" title="ctrl+shift+s">save layout as</a>
@@ -134,6 +134,11 @@
             <textarea placeholder="item1, item2, item3..." id="draggable-selectable-field"></textarea>
         </div>
         <button class="apply" onclick="PopupTasks.defineSelectables(event)">apply</button>
+    </div>
+    <div id="logger-popup" class="popup" style="width: 90%; height: 90%;">
+        <div class="absolute-centered-wrapper" id="log-container">
+
+        </div>
     </div>
 </body>
 </html>

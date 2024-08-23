@@ -436,3 +436,25 @@ body {
     left: 50%;
     transform: translateX(-50%);
 }
+
+#logger-popup {
+    max-width: 1100px;
+    max-height: 700px;
+    padding: 75px;
+    padding-top: 75px;
+    box-sizing: border-box;
+}
+
+#log-container {
+    width: calc(100% - 175px);
+    height: calc(100% - 125px);
+    display: inline;
+    overflow: auto;
+    background-color: #39303b;
+}
+
+.log-entry {
+    text-wrap: nowrap;
+    font-size: 15;
+    font-family: Roboto;
+}
