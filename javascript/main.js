@@ -58,21 +58,31 @@ function initialize() { // This is called when the body portion of the html docu
     group.generateHTML(themeWrapper);
     group.selectByName(themes.get(SettingsManager.Themes.selectedThemeName));
 
-    Popup.populateVerticalInputs(document.getElementById("draggable-position-inputs"), new Popup.PopupInput("0", "x position", "x-pose-input"), new Popup.PopupInput("0", "y position", "y-pose-input"));
-    Popup.populateVerticalInputs(document.getElementById("import-json-info"), new Popup.PopupInput("import", "layout name", "import-layout-name"), new Popup.PopupInput("", "layout JSON", "import-layout-json"));
+    Popup.populateVerticalInputs(document.getElementById("draggable-position-inputs"), 
+        new Popup.PopupInput("0", "x position", "x-pose-input"), 
+        new Popup.PopupInput("0", "y position", "y-pose-input")
+    );
+    Popup.populateVerticalInputs(document.getElementById("import-json-info"),
+        new Popup.PopupInput("import", "layout name", "import-layout-name"),
+        new Popup.PopupInput("", "layout JSON", "import-layout-json")
+    );
     Popup.populateVerticalInputs(document.getElementById("point-configure-inputs"),
         new Popup.PopupInput("", "x (in)", "path-point-x"),
         new Popup.PopupInput("", "y (in)", "path-point-y"),
         new Popup.PopupInput("", "follow radius (in)", "path-point-radius"),
         new Popup.PopupInput("", "target follow rotation (degrees)", "target-follow-rotation"),
         new Popup.PopupInput("", "target end rotation (degrees)", "target-end-rotation"),
-        new Popup.PopupInput("", "max velocity (%)", "max-velocity"),
+        new Popup.PopupInput("", "max velocity (%)", "max-velocity")
+    );
+    Popup.populateVerticalInputs(document.getElementById("border-config-inputs"),
+        new Popup.PopupInput("white", "border color", "draggable-border-color"),
+        new Popup.PopupInput("0", "border width", "draggable-border-width")
     );
 
     Popup.initializePopups();
 
     SettingsManager.setTheme();
-    Load.openJSONLayout("webdashboard-layout:default");
+    Load.openJSONLayout(Load.DEFAULT_LAYOUT_KEY);
 }
 
 function addEventListeners() {

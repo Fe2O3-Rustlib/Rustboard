@@ -203,13 +203,26 @@ var PopupTasks = {
         Popup.closePopup(popup);
     },
 
-    setDistanceToPixels: function() {
+    setDistanceToPixels: function(event) {
         let popup = Popup.getPopupFromChild(event.target);
         let distanceToPixels = parseFloat(popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value);
         if (isNaN(distanceToPixels)) {
             Notify.createNotice("Not a number", Notify.NEGATIVE, 5000);
         } else {
             Whiteboard.currentNode.configuration.distanceToPixels = distanceToPixels;
+            Popup.closePopup(popup);
+        }
+    },
+
+    configureBorder: function(event) {
+        let popup = Popup.getPopupFromChild(event.target);
+        let color = Popup.getInput("draggable-border-color").value;
+        let width = parseFloat(Popup.getInput("draggable-border-width").value);
+        if (isNaN(width)) {
+            Notify.createNotice("Invalid border width", Notify.NEGATIVE, 5000);
+        } else {
+            Whiteboard.logChange();
+            Whiteboard.currentNode.configureBorder(color, width);
             Popup.closePopup(popup);
         }
     },
@@ -222,11 +235,11 @@ var PopupTasks = {
         let y = parseFloat(Popup.getInput("path-point-y").value);
         let radius = parseFloat(Popup.getInput("path-point-radius").value);
         let targetFollowRotation = parseFloat(Popup.getInput("target-follow-rotation").value);
-        if (targetFollowRotation == undefined) {
+        if (isNaN(targetFollowRotation)) {
             targetFollowRotation = null;
         }
         let targetEndRotation = parseFloat(Popup.getInput("target-end-rotation").value);
-        if (targetEndRotation == undefined) {
+        if (isNaN(targetEndRotation)) {
             targetEndRotation = null;
         }
         let maxVelocity = parseFloat(Popup.getInput("max-velocity").value);

@@ -143,6 +143,7 @@ var Load = {
     },
 
     openJSONLayout: function (key) {
+        Whiteboard.clearTimeline();
         if (Whiteboard.layoutNodeRegistry > 0) {
             Load.defaultSave(false);
         }

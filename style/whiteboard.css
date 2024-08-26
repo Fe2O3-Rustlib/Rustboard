@@ -1,8 +1,7 @@
 .whiteboard-draggable {
-    z-index: 1;
+    z-index: inherit;
     position: absolute;
     display: inline-block;
-    box-sizing: border-box;
     border-radius: 7px;
     overflow: hidden;
     font-family: Roboto;
@@ -15,6 +14,7 @@
 }
 
 .whiteboard-label {
+    z-index: inherit;
     font-family: Roboto;
     text-align: center;
     position: absolute;
@@ -37,6 +37,11 @@
     font-family: Roboto;
     font-size: 15px;
     resize: none;
+}
+
+.border-div {
+    z-index: inherit;
+    position: absolute;
 }
 
 #whiteboard {

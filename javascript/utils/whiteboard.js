@@ -196,7 +196,11 @@ var Whiteboard = {
             this.fieldImg.setAttribute("draggable", false);
             this.div.appendChild(this.fieldImg);
             this.container = document.createElement("div");
+            this.container.style.overflow = "visible";
             this.label = document.createElement("input");
+            this.borderDiv = document.createElement("div");
+            this.borderDiv.classList.add("border-div");
+            this.container.appendChild(this.borderDiv);
             if (!Whiteboard.editingMode) this.label.readOnly = true;
             this.div.className = Whiteboard.NODE_CLASSNAME;
             this.onDrag = (function() {
@@ -212,13 +216,13 @@ var Whiteboard = {
             this.updateIndex(Whiteboard.layoutNodeRegistry.length);
             this.configuration.name = configuration.name;
             this.configuration.position = configuration.position;
+            this.configuration.borderWidth = getValue(configuration.borderWidth, 0);
+            this.setBorderWidth();
+            this.configuration.borderColor = getValue(configuration.borderColor, "transparent");
+            this.setBorderColor();
             this.setSize(configuration.size, false);
             this.setFontSize(configuration.fontSize);
             this.setColor(configuration.color);
-            this.configuration.borderWidth = getValue(configuration.borderWidth, 0);
-            this.setBorderWidth();
-            this.configuration.bodrerColor = getValue(configuration.borderColor, "transparent");
-            this.setBorderColor();
             this.configuration.streamURL = getValue(configuration.streamURL, "http://192.168.43.1:10000");
             this.setStreamSize(configuration.streamSize);
             this.selectableGroup = null;
@@ -306,12 +310,20 @@ var Whiteboard = {
         }
 
         setBorderWidth() {
-            this.div.style.borderStyle = "solid";
-            this.div.style.borderWidth = this.configuration.borderWidth;
+            this.borderDiv.style.borderStyle = "solid";
+            this.borderDiv.style.borderWidth = this.configuration.borderWidth + "px";
         }
 
         setBorderColor() {
-            this.div.style.borderColor = this.configuration.borderColor;
+            this.borderDiv.style.borderColor = this.configuration.borderColor;
+        }
+
+        configureBorder(color, width) {
+            this.configuration.borderColor = color;
+            this.configuration.borderWidth = width;
+            this.setBorderColor();
+            this.setBorderWidth();
+            this.setSize(this.configuration.size);
         }
 
         setLastUpdate() {
@@ -549,15 +561,21 @@ var Whiteboard = {
             }
             super.setDraggablePosition(pose, false);
             this.configuration.position = this.position;
-            const labelOffset = (this.div.clientWidth - (this.label.clientWidth + getBorderWidth(this.label))) / 2;
+            const labelOffset = (this.div.offsetWidth - this.label.offsetWidth) / 2;
             this.label.style.left = Positioning.toHTMLPositionPX(this.position.x + labelOffset);
-            this.label.style.top = Positioning.toHTMLPositionPX(this.position.y + this.div.clientHeight + 10);
+            this.label.style.top = Positioning.toHTMLPositionPX(this.position.y + this.div.offsetHeight + 10);
+            const borderOffset = this.configuration.borderWidth;
+            this.borderDiv.style.left = Positioning.toHTMLPositionPX(this.position.x - borderOffset);
+            this.borderDiv.style.top = Positioning.toHTMLPositionPX(this.position.y - borderOffset);
         }
 
         updateChildPositions() {
-            const labelOffset = (this.div.clientWidth - (this.label.clientWidth + getBorderWidth(this.label))) / 2;
+            const labelOffset = (this.div.offsetWidth - this.label.offsetWidth) / 2;
             this.label.style.left = Positioning.toHTMLPositionPX(this.position.x + labelOffset);
-            this.label.style.top = Positioning.toHTMLPositionPX(this.position.y + this.div.clientHeight + 10);
+            this.label.style.top = Positioning.toHTMLPositionPX(this.position.y + this.div.offsetHeight + 10);
+            const borderOffset = this.configuration.borderWidth;
+            this.borderDiv.style.left = Positioning.toHTMLPositionPX(this.position.x - borderOffset);
+            this.borderDiv.style.top = Positioning.toHTMLPositionPX(this.position.y - borderOffset);
             if (this.isType(Whiteboard.WhiteboardDraggable.Types.PATH)) {
                 for (let i = 0; i < this.pathPoints.length; i++) {
                     this.pathPoints[i].setDraggablePosition(this.position.add(this.pathPoints[i].relativePosition));
@@ -681,12 +699,17 @@ var Whiteboard = {
             this.label.style.width = Positioning.toHTMLPositionPX(Positioning.clamp(this.configuration.size.x * 0.75, 75, Number.POSITIVE_INFINITY));
             Draggable.dragOffset = new Positioning.Vector2d(0, 0); // Calling setPosition() will take into account the dragOffset variable.  This isn't desirable here, so it is set to (0, 0)
             this.setPosition(this.configuration.position); // If this method is not called, the position of the label relative to that of the div will be wrong
-            this.canvas.style.width = Positioning.toHTMLPositionPX(this.configuration.size.x);
-            this.canvas.style.height = Positioning.toHTMLPositionPX(this.configuration.size.y);
-            this.canvas.width = this.configuration.size.x;
-            this.canvas.height = this.configuration.size.y;
-            this.fieldImg.style.width = Positioning.toHTMLPositionPX(this.configuration.size.x);
-            this.fieldImg.style.height = Positioning.toHTMLPositionPX(this.configuration.size.y);
+            let childWidth = this.configuration.size.x;
+            let childHeight = this.configuration.size.y;
+            this.borderDiv.style.width = Positioning.toHTMLPositionPX(childWidth);
+            this.borderDiv.style.height = Positioning.toHTMLPositionPX(childHeight);
+            this.borderDiv.style.borderRadius = Positioning.toHTMLPositionPX(7 + this.configuration.borderWidth);
+            this.canvas.style.width = Positioning.toHTMLPositionPX(childWidth);
+            this.canvas.style.height = Positioning.toHTMLPositionPX(childHeight);
+            this.canvas.width = childWidth;
+            this.canvas.height = childHeight;
+            this.fieldImg.style.width = Positioning.toHTMLPositionPX(childWidth);
+            this.fieldImg.style.height = Positioning.toHTMLPositionPX(childHeight);
             if (this.isType(Whiteboard.WhiteboardDraggable.Types.GRAPH)) {
                 this.drawGraph(0, 0, 0);
             } else if (Whiteboard.WhiteboardDraggable.Types.PATH) {
@@ -712,17 +735,19 @@ var Whiteboard = {
 
         setLayer(layer, arrangeOthers = true) {
             if (layer === this.configuration.layer) return;
-            this.div.style.zIndex = 1000 + layer;
-            this.label.style.zIndex = 1000 + layer;
+            this.container.style.zIndex = 1000 + layer;
             if (this.configuration.layer != undefined && arrangeOthers) { // this.configuration.layer is equivalent to the prior draggable layer, and layer is equivalent to the new layer
                 if (layer > this.configuration.layer) {
                     for (let i = layer; i > this.configuration.layer; i--) {
-                        Whiteboard.layoutNodeRegistry[i].setLayer(i - 1, false);
-                        Whiteboard.layoutNodeRegistry[i].setLayer(i - 1, false);
+                        if (Whiteboard.layoutNodeRegistry[i] !== this) {
+                            Whiteboard.layoutNodeRegistry[i].setLayer(i - 1, false);
+                        }
                     }
                 } else {
                     for (let i = layer; i < this.configuration.layer; i++) {
-                        Whiteboard.layoutNodeRegistry[i].setLayer(i + 1, false);
+                        if (Whiteboard.layoutNodeRegistry[i] !== this) {
+                            Whiteboard.layoutNodeRegistry[i].setLayer(i + 1, false);
+                        }
                     }
                 }
             }
@@ -1002,6 +1027,10 @@ var Whiteboard = {
         }
         Load.findLinkedNodes();
         Socket.sendRustboard();
+    },
+
+    clearTimeline: function() {
+        Whiteboard.States.timeline = [];
     },
     // #endregion
 
