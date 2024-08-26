@@ -48,6 +48,10 @@
     color: #0098cb;
 }
 
+.popup-input-blue::placeholder {
+    color: #addddc;
+}
+
 .apply-blue {
     background-color: white;
     color: #0098cb;
@@ -67,6 +71,10 @@
     background-color: white;
 }
 
+.draggable-selectable-field-blue::placeholder {
+    color: #addddc;
+}
+
 .default-selectable-blue {
     background-color: white;
     color: #0098cb;
@@ -80,4 +88,31 @@
 .default-selectable-selected-blue {
     background-color: #0098cb;
     color: white;
+}
+
+.draggable-unselect-blue {
+    width: 100%;
+    height: 20px;
+    background-color: white;
+    color: #0098cb;
+    text-align: center;
+}
+
+.draggable-select-blue {
+    background-color: #0098cb;
+    color: white;
+}
+
+.selectable-container-blue {
+    border-color: #0098cb;
+}
+
+.list-container-blue {
+    border-color: #0098cb;
+}
+
+.draggable-label-blue {
+    border-color: #0098cb;
+    color: #0098cb;
+    background-color: #e6ffff;
 }

@@ -84,7 +84,6 @@ var PopupTasks = {
     },
 
     setStreamSize: function (event) {
-        Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
         let size = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         size = size.split(/[Xx]/);
@@ -93,20 +92,15 @@ var PopupTasks = {
         if (isNaN(width) || isNaN(height)) {
             Notify.createNotice("Invalid stream size", Notify.NEGATIVE, 5000);
         } else {
+            Whiteboard.logChange();
             Whiteboard.currentNode.setStreamSize(new Positioning.Vector2d(width, height));
             Popup.closePopup(popup);
         }
     },
 
-    setStreamUpdateFrequency: function(event) {
+    configureNodeBorder: function(event) {
+        Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
-        let updateFrequency = parseFloat(popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value);
-        if (isNaN(updateFrequency)) {
-            Notify.createNotice("Invalid frequency", Notify.NEGATIVE, 5000);
-        } else {
-            Whiteboard.currentNode.setStreamUpdatePeriod(1000 / updateFrequency);
-            Popup.closePopup(popup);
-        }
     },
 
     setFontSize: function(event) {
@@ -121,21 +115,25 @@ var PopupTasks = {
         }
     },
 
-    setWhiteBoardBorderSize: function (event) {
+    setWhiteboardBorderSize: function (event) {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
         let size = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         size = size.split(/[Xx]/);
-        let border = document.getElementById("whiteboard-border");
-        border.style.width = Positioning.toHTMLPositionPX(size[0]);
-        border.style.height = Positioning.toHTMLPositionPX(size[1]);
-        Popup.closePopup(popup);
+        let border = document.getElementById(Whiteboard.WHITEBOARD_BORDER_ID);
+        if (isNaN(parseFloat(size[0])) || isNaN(parseFloat(size[1]))) {
+            Notify.createNotice("Invalid size", Notify.NEGATIVE, 5000);
+        } else {
+            border.style.width = Positioning.toHTMLPositionPX(size[0]);
+            border.style.height = Positioning.toHTMLPositionPX(size[1]);
+            Popup.closePopup(popup);
+        }
     },
 
     renameLayout: function (event) {
         let toBeRenamed;
         if (Popup.selected == null) {
-            toBeRenamed = Load.currentLayout;
+            toBeRenamed = Load.currentLayoutName;
         } else {
             toBeRenamed = Popup.selected.innerHTML;
         }
@@ -153,7 +151,7 @@ var PopupTasks = {
                 Notify.createNotice("That layout name already exists!", Notify.NEGATIVE, 2500);
                 return;
             } else {
-                if (Load.currentLayout === toBeRenamed) {
+                if (Load.currentLayoutName === toBeRenamed) {
                     Load.updateCurrentLayout(name);
                 }
                 data = localStorage.getItem("webdashboard-layout:" + toBeRenamed);

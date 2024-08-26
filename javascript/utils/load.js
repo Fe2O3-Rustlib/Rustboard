@@ -1,25 +1,29 @@
 var Load = {
-    currentLayout: "default",
+    DEFAULT_LAYOUT_NAME: "default",
+    DEFAULT_LAYOUT_KEY: "webdashboard-layout:default",
+    LAYOUT_PREFIX: "webdashboard-layout:",
+    LAYOUT_PREFIX_REGEX: /webdashboard-layout:/,
+    currentLayoutName: "default",
     linkedNodes: {},
 
     listLayoutNames: function () {
         let layoutNames = [];
         for (let i = 0; i < localStorage.length; i++) {
-            if (/webdashboard-layout:/.test(localStorage.key(i))) {
-                let layoutName = localStorage.key(i).replace(/webdashboard-layout:/, "");
-                if (layoutName !== "default") {
+            if (Load.LAYOUT_PREFIX_REGEX.test(localStorage.key(i))) {
+                let layoutName = localStorage.key(i).replace(Load.LAYOUT_PREFIX_REGEX, "");
+                if (layoutName !== Load.DEFAULT_LAYOUT_NAME) {
                     layoutNames.push(layoutName);
                 }
             }
         }
         layoutNames.sort();
-        layoutNames.unshift("default");
+        layoutNames.unshift(Load.DEFAULT_LAYOUT_NAME);
         return layoutNames;
     },
 
     removeLayout: function (key) {
         try {
-            if (key !== "webdashboard-layout:default") {
+            if (key !== Load.DEFAULT_LAYOUT_KEY) {
                 localStorage.removeItem(key);
             }
         } catch {
@@ -31,29 +35,29 @@ var Load = {
         let popup = Popup.getPopupFromChild(event.target);
         Load.removeLayout(key);
         let buttons = Array.from(document.getElementById("open-layout").getElementsByClassName("layout-selectable"));
-        buttons.forEach((button) => { if (button.innerHTML === key.replace(/webdashboard-layout:/, "")) { button.remove() } });
+        buttons.forEach((button) => { if (button.innerHTML === key.replace(Load.LAYOUT_PREFIX_REGEX, "")) { button.remove() } });
         Popup.closePopup(popup);
     },
 
     removeAllLayouts: function (event) {
         let layoutNames = Load.listLayoutNames();
         for (let i = 0; i < layoutNames.length; i++) {
-            Load.removeLayout(`webdashboard-layout:${layoutNames[i]}`);
+            Load.removeLayout(Load.LAYOUT_PREFIX + layoutNames[i]);
         }
-        Load.openJSONLayout("webdashboard-layout:default");
+        Load.openJSONLayout(Load.DEFAULT_LAYOUT_KEY);
         Load.clearLayout();
         Whiteboard.States.clearTimeline();
         Load.defaultSave(notify = false);
         Popup.closePopup(Popup.getPopupFromChild(event.target));
     },
 
-    updateCurrentLayout: function (name) {
-        Load.currentLayout = name;
+    updateCurrentLayout: function (layoutName) {
+        Load.currentLayoutName = layoutName;
         let layoutLabel = document.getElementById("layout-name");
-        if (Load.currentLayout === "default") {
+        if (Load.currentLayoutName === Load.DEFAULT_LAYOUT_NAME) {
             layoutLabel.innerHTML = "default layout";
         } else {
-            layoutLabel.innerHTML = `layout: ${Load.currentLayout}`;
+            layoutLabel.innerHTML = `layout: ${Load.currentLayoutName}`;
         }
     },
 
@@ -68,9 +72,9 @@ var Load = {
         for (let i = 0; i < Whiteboard.layoutNodeRegistry.length; i++) {
             Load.getDraggableName(Whiteboard.layoutNodeRegistry[i]);
         }
-        let name = popup.getElementsByClassName("popup-input")[0].value;
+        let name = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         Load.updateCurrentLayout(name);
-        localStorage.setItem("webdashboard-layout:" + name, Load.getLayoutJSONString());
+        localStorage.setItem(Load.LAYOUT_PREFIX + name, Load.getLayoutJSONString());
         Load.handleNotDefaultBtns(name);
         Popup.closePopup(popup);
     },
@@ -79,7 +83,7 @@ var Load = {
         for (let i = 0; i < Whiteboard.layoutNodeRegistry.length; i++) {
             Load.getDraggableName(Whiteboard.layoutNodeRegistry[i]);
         }
-        localStorage.setItem(`webdashboard-layout:${Load.currentLayout}`, Load.getLayoutJSONString());
+        localStorage.setItem(Load.LAYOUT_PREFIX + Load.currentLayoutName, Load.getLayoutJSONString());
         if (notify) Notify.createNotice("Layout saved", Notify.POSITIVE, 3000);
     },
 
@@ -107,11 +111,11 @@ var Load = {
         let listContainer = document.getElementById("select-json-container");
         listContainer.innerHTML = "";
         let layoutNames = Load.listLayoutNames();
-        Popup.populatePopupClickableList(document.getElementById("select-json-container"), layoutNames, (name) => name, (name) => {
+        Popup.populatePopupClickableList(document.getElementById("select-json-container"), Load.currentLayoutName, layoutNames, (name) => {
             return () => {
                 Load.openJSONLayout(`webdashboard-layout:${name}`); Popup.closePopup(popup);
             }
-        }, "layout-selectable default-selectable " + SettingsManager.Themes.selectedTheme.defaultSelectable);
+        }, () => "layout-selectable default-selectable " + SettingsManager.Themes.selectedTheme.defaultSelectable);
     },
 
     getLayoutObject: function () {
@@ -121,7 +125,7 @@ var Load = {
         data.nodeData = nodeData;
         let border = document.getElementById("whiteboard-border");
         data.border = { "width": border.style.width, "height": border.style.height };
-        data.name = Load.currentLayout;
+        data.name = Load.currentLayoutName;
         return data;
     },
 
@@ -131,7 +135,7 @@ var Load = {
 
     handleNotDefaultBtns: function (key) {
         let notDefaultBtns = Array.from(document.getElementsByClassName("not-default"));
-        if (key.replace(/webdashboard-layout:/, "") === "default") {
+        if (key.replace(Load.LAYOUT_PREFIX_REGEX, "") === "default") {
             notDefaultBtns.forEach((button) => button.style.display = "none");
         } else {
             notDefaultBtns.forEach((button) => button.style.display = "block");
@@ -143,7 +147,7 @@ var Load = {
             Load.defaultSave(false);
         }
         Load.handleNotDefaultBtns(key);
-        Load.updateCurrentLayout(key.replace(/webdashboard-layout:/, ""));
+        Load.updateCurrentLayout(key.replace(Load.LAYOUT_PREFIX_REGEX, ""));
         Load.clearLayout(logChange = false);
         try {
             let data = localStorage.getItem(key);
@@ -166,7 +170,7 @@ var Load = {
 
     findLinkedNodes: function() {
         let linkedNodeData = {
-            masterLayout: Load.currentLayout,
+            masterLayout: Load.currentLayoutName,
             linkedNodes: []
         }
         let layoutNames = Load.listLayoutNames();
@@ -181,7 +185,7 @@ var Load = {
             };
             let foundLink = false;
             for (let ii = 0; ii < layoutNames.length; ii++) {
-                if (layoutNames[ii] !== Load.currentLayout) {
+                if (layoutNames[ii] !== Load.currentLayoutName) {
                     try {
                         layoutObject = JSON.parse(localStorage.getItem(`webdashboard-layout:${layoutNames[ii]}`));
                         for (let iii = 0; iii < layoutObject.nodeData.length; iii++) {
@@ -234,7 +238,7 @@ var Load = {
                     nodeToModify.state = masterNode.state;
                     nodeToModify.pathPoints = masterNode.pathPoints;
                     nodeToModify.last_node_update = masterNode.last_node_update;
-                    if (layoutNames[i] === Load.currentLayout) {
+                    if (layoutNames[i] === Load.currentLayoutName) {
                         Whiteboard.getNodeById(nodeToModify.id).setState(masterNode.state);
                         Whiteboard.getNodeById(nodeToModify.id).configuration.pathPoints = masterNode.pathPoints;
                     }
@@ -265,7 +269,7 @@ var Load = {
 
     exportJSON: function (key) {
         let data;
-        if (key === "webdashboard-layout:default") {
+        if (key === Load.DEFAULT_LAYOUT_KEY) {
             data = Load.getLayoutJSONString();
         } else {
             data = localStorage.getItem(key);
@@ -296,12 +300,12 @@ var Load = {
     importJSON: function (event) {
         Load.defaultSave(false);
         let popup = Popup.getPopupFromChild(event.target);
-        let name = document.getElementById("import-layout-name").getElementsByClassName("popup-input")[0].value;
+        let name = document.getElementById("import-layout-name").getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         if (name === "") {
             Notify.createNotice("Illegal layout name", Notify.NEGATIVE, 3000);
             return;
         }
-        let json = document.getElementById("import-layout-json").getElementsByClassName("popup-input")[0].value;
+        let json = document.getElementById("import-layout-json").getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         localStorage.setItem(`webdashboard-layout:${name}`, json);
         try {
             Load.openJSON(json);
@@ -316,10 +320,10 @@ var Load = {
     setAsDefault: function (key) {
         try {
             let data = localStorage.getItem(key);
-            localStorage.setItem("webdashboard-layout:default", data);
+            localStorage.setItem(Load.DEFAULT_LAYOUT_KEY, data);
             Whiteboard.logChange();
-            if (Load.currentLayout == "default") {
-                Load.openJSONLayout("webdashboard-layout:default");
+            if (Load.currentLayoutName == "default") {
+                Load.openJSONLayout(Load.DEFAULT_LAYOUT_KEY);
             }
             Notify.createNotice("Set the current layout as default", Notify.POSITIVE, 3000);
         } catch (err) {
@@ -340,7 +344,7 @@ var Load = {
     },
 
     layoutChanged: function () {
-        return Load.getLayoutJSONString() !== localStorage.getItem(`webdashboard-layout:${Load.currentLayout}`);
+        return Load.getLayoutJSONString() !== localStorage.getItem(`webdashboard-layout:${Load.currentLayoutName}`);
     },
 
     targetLayout: "",

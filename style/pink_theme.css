@@ -48,6 +48,10 @@
     color: #ff3399;
 }
 
+.popup-input-pink::placeholder {
+    color:#ee98c3;
+}
+
 .apply-pink {
     background-color: white;
     color: #ff3399;
@@ -67,6 +71,10 @@
     background-color: white;
 }
 
+.draggable-selectable-field-pink::placeholder {
+    color:#ee98c3;
+}
+
 .default-selectable-pink {
     background-color: white;
     color: #ff3399;
@@ -80,4 +88,31 @@
 .default-selectable-selected-pink {
     background-color: #ff3399;
     color: white;
+}
+
+.draggable-unselect-pink {
+    width: 100%;
+    height: 20px;
+    background-color: white;
+    color: #ff3399;
+    text-align: center;
+}
+
+.draggable-select-pink {
+    background-color: #ff3399;
+    color: white;
+}
+
+.selectable-container-pink {
+    border-color: #ff3399;
+}
+
+.list-container-pink {
+    border-color: #ff3399;
+}
+
+.draggable-label-pink {
+    border-color: #ff3399;
+    color: #ff3399;
+    background-color: #ffccf2;
 }

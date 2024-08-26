@@ -1,4 +1,5 @@
 var isFullScreen = false;
+var selectNodeTypeGroup;
 
 function inFullScreen() {
     const windowWidth = window.innerWidth * window.devicePixelRatio;
@@ -10,7 +11,7 @@ function inFullScreen() {
 
 function initialize() { // This is called when the body portion of the html document loads
     SettingsManager.loadSettings();
-    if (!localStorage.getItem("webdashboard-layout:default")) {
+    if (!localStorage.getItem(Load.DEFAULT_LAYOUT_KEY)) {
         Load.defaultSave();
         console.warn("It looks like this is your first time using the dashboard in this browser.  Welcome!");
         setTimeout(() => Notify.createNotice("Welcome!", Notify.POSITIVE, 5000), 3000);
@@ -24,7 +25,7 @@ function initialize() { // This is called when the body portion of the html docu
 
     Popup.generateSimpleInputPopup("Load-layout-as", Load.saveJSON, new Popup.PopupInput("Enter the new layout name", "Save as"));
     Popup.generateSimpleInputPopup("layout-renamer", PopupTasks.renameLayout, new Popup.PopupInput("Enter the new layout name", "rename layout"));
-    Popup.generateSimpleInputPopup("whiteboard-size-setter", PopupTasks.setWhiteBoardBorderSize, new Popup.PopupInput("750x500", "border size"));
+    Popup.generateSimpleInputPopup("whiteboard-size-setter", PopupTasks.setWhiteboardBorderSize, new Popup.PopupInput("750x500", "border size"));
     Popup.generateSimpleInputPopup("size-picker", PopupTasks.setDraggableSize, new Popup.PopupInput("100x100", "draggable size"));
     Popup.generateSimpleInputPopup("color-picker", PopupTasks.changeColor, new Popup.PopupInput("#ffffff", "draggable color"));
     Popup.generateSimpleInputPopup("id-changer", PopupTasks.changeID, new Popup.PopupInput("Enter draggable id", "draggable id", "draggable-id"));
@@ -33,7 +34,6 @@ function initialize() { // This is called when the body portion of the html docu
     Popup.generateSimpleInputPopup("text-telemetry-font-size-setter", PopupTasks.setFontSize, new Popup.PopupInput("15", "font size"));
     Popup.generateSimpleInputPopup("path-timeout-setter", PopupTasks.setPathTimeout, new Popup.PopupInput("10000", "path timeout (milliseconds)"));
     Popup.generateSimpleInputPopup("distance-to-pixels-setter", PopupTasks.setDistanceToPixels, new Popup.PopupInput(5, "distance to pixels constant"));
-    Popup.generateSimpleInputPopup("stream-update-setter", PopupTasks.setStreamUpdateFrequency, new Popup.PopupInput(10, "stream update rate (Hz)"));
     Popup.setOnOpen("path-timeout-setter", PopupTasks.populatePathTimeout);
 
     Popup.setOnOpen("stream-url-setter", () => Popup.getInput("stream-url-input").value = Whiteboard.currentNode.configuration.streamURL);
@@ -41,19 +41,22 @@ function initialize() { // This is called when the body portion of the html docu
     let draggableTypes = [];
     Object.keys(Whiteboard.WhiteboardDraggable.Types).forEach((key) => draggableTypes.push(Whiteboard.WhiteboardDraggable.Types[key]));
 
-    Popup.populatePopupClickableList(document.getElementById("select-type-container"), draggableTypes, (iterable) => iterable, (iterable) => { return () => PopupTasks.setType(iterable) });
+    selectNodeTypeGroup = Popup.populatePopupClickableList(document.getElementById("select-type-container"), null, draggableTypes, (iterable) => { return () => PopupTasks.setType(iterable) });
 
     Popup.populateVerticalInputs(document.getElementById("websocket-info-wrapper"), new Popup.PopupInput("21865", "team number", "team-number"), new Popup.PopupInput("ws://192.168.43.1:5837", "websocket url", "websocket-url"));
     let themeWrapper = document.getElementById("theme-wrapper");
-    let themes = [
-        new Popup.Selectable("Mr. Blue", () => SettingsManager.Themes.selectedThemeName = "MR_BLUE", null, null, true),
-        new Popup.Selectable("Charcoal", () => SettingsManager.Themes.selectedThemeName = "CHARCOAL", null, null, true),
-        new Popup.Selectable("Snow", () => SettingsManager.Themes.selectedThemeName = "LIGHT", null, null, true),
-        new Popup.Selectable("Slay", () => SettingsManager.Themes.selectedThemeName = "SLAY", null, null, true)
-    ];
-    let group = new Popup.SelectableGroup();
-    themes.forEach((theme) => group.add(theme));
+
+    let themes = new Map([
+        ["MR_BLUE", "Mr. Blue"],
+        ["CHARCOAL", "Charcoal"],
+        ["LIGHT", "Snow"],
+        ["SLAY", "Slay"],
+    ]);
+
+    let group = new Select.SelectableGroup();
+    themes.forEach((value, key) => group.add(new Select.Selectable(value, () => SettingsManager.Themes.selectedThemeName = key, null, null, true)));
     group.generateHTML(themeWrapper);
+    group.selectByName(themes.get(SettingsManager.Themes.selectedThemeName));
 
     Popup.populateVerticalInputs(document.getElementById("draggable-position-inputs"), new Popup.PopupInput("0", "x position", "x-pose-input"), new Popup.PopupInput("0", "y position", "y-pose-input"));
     Popup.populateVerticalInputs(document.getElementById("import-json-info"), new Popup.PopupInput("import", "layout name", "import-layout-name"), new Popup.PopupInput("", "layout JSON", "import-layout-json"));
@@ -83,9 +86,13 @@ function addEventListeners() {
                     Load.defaultSave();
                 }
             } else if (event.key === "z") {
-                Whiteboard.undoChange();
+                if (Popup.openPopups == 0) {
+                    Whiteboard.undoChange();
+                }
             } else if (event.key === "y") {
-                Whiteboard.redoChange();
+                if (Popup.openPopups == 0) {
+                    Whiteboard.redoChange();
+                }
             } else if (event.key === "v" && Whiteboard.editingMode && document.activeElement.nodeName !== "TEXTAREA" && document.activeElement.nodeName !== "INPUT") {
                 event.preventDefault();
                 Load.pasteNode();
@@ -155,7 +162,7 @@ function generateContextMenu(event) {
 
     let draggableElement = Whiteboard.getDraggableAncestor(event.target);
     if (draggableElement) {
-        let node = Whiteboard.layoutNodeRegistry[Whiteboard.getDraggableIndex(draggableElement)]
+        let node = Whiteboard.layoutNodeRegistry[Whiteboard.getNodeIndex(draggableElement)]
         Whiteboard.currentNode = node;
 
         if (event.target.classList.contains("path-point")) {
@@ -188,6 +195,7 @@ function generateContextMenu(event) {
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.TEXT_TELEMETRY) || node.isType(Whiteboard.WhiteboardDraggable.Types.TEXT_INPUT)) {
                     generateContextMenuButton(container, "set font size", () => Popup.openPopup("text-telemetry-font-size-setter"));
                 }
+                generateContextMenuButton(container, "configure border", () => Popup.openPopup("border-configuration-setter"));
                 generateContextMenuButton(container, "set size", () => Popup.openPopup("size-picker"));
                 generateContextMenuButton(container, "set position", () => {Popup.openPopup("position-setter"); PopupTasks.populatePositionInfo()});
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.TEXT_INPUT) || node.isType(Whiteboard.WhiteboardDraggable.Types.TOGGLE)) {
@@ -198,7 +206,6 @@ function generateContextMenu(event) {
                 }
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.CAMERA_STREAM)) {
                     generateContextMenuButton(container, "set stream url", () => Popup.openPopup("stream-url-setter"));
-                    generateContextMenuButton(container, "set update Hz", () => Popup.openPopup("stream-update-setter"));
                     generateContextMenuButton(container, "set stream size", () => Popup.openPopup("stream-size-setter"));
                 }
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.PATH)) {
@@ -209,8 +216,8 @@ function generateContextMenu(event) {
                     generateContextMenuButton(container, "reverse", () => node.reversePathOrder());
                     generateContextMenuButton(container, "save to robot", () => node.sendPath());
                 }
-                generateContextMenuButton(container, "set type", () => Popup.openPopup("type-setter"));
-                generateContextMenuButton(container, "duplicate", () => Whiteboard.duplicate(Whiteboard.layoutNodeRegistry[Whiteboard.getDraggableIndex(Whiteboard.currentNode.div)]));
+                generateContextMenuButton(container, "set type", () => { selectNodeTypeGroup.selectByName(node.configuration.type); Popup.openPopup("type-setter") });
+                generateContextMenuButton(container, "duplicate", () => Whiteboard.duplicate(Whiteboard.layoutNodeRegistry[Whiteboard.getNodeIndex(Whiteboard.currentNode.div)]));
             }
         }
     } else if (event.target.id === "whiteboard-border") {

@@ -276,6 +276,9 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     background-color: white;
+    padding: 5px;
+    border-width: 3px;
+    border-style: solid;
 }
 
 .selectable {
@@ -417,6 +420,9 @@ body {
     grid-template-rows: repeat(auto-fill, min-content);
     overflow-x: hidden;
     overflow-y: auto;
+    padding: 5px;
+    border-width: 3px;
+    border-style: solid;
 }
 
 #theme-chooser-wrapper {

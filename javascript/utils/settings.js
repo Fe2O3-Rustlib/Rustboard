@@ -23,10 +23,13 @@ var SettingsManager = {
             applyBtn: "apply",
             prompt: "prompt",
             draggableField: "draggable-selectable-field",
+            listContainer: "list-container",
+            selectableContainer: "selectable-container",
             defaultSelectable: "default-selectable",
             defaultSelectableSelected: "default-selectable-selected",
             draggableUnselect: "draggable-unselect",
             draggableSelect: "draggable-select",
+            draggableLabel: "draggable-label"
         },
 
         MR_BLUE: {
@@ -81,8 +84,13 @@ var SettingsManager = {
         }
         localStorage.setItem("webdashboard-settings", JSON.stringify(storedSettings));
         Popup.closePopup(popup);
-        if (SettingsManager.Themes[SettingsManager.Themes.selectedThemeName] != SettingsManager.Themes.selectedTheme) {
-            location.reload();
+        let newTheme = SettingsManager.Themes[SettingsManager.Themes.selectedThemeName];
+        if (newTheme != SettingsManager.Themes.selectedTheme) {
+            SettingsManager.manageTheme(SettingsManager.Themes.selectedTheme, false);
+            SettingsManager.Themes.selectedTheme = newTheme;
+            SettingsManager.populateTheme(newTheme);
+            SettingsManager.manageTheme(newTheme, true);
+            Select.Selectable.refreshAllThemes();
         }
     },
 
@@ -92,12 +100,7 @@ var SettingsManager = {
         SettingsManager.websocketURL = getValue(storedSettings.websocketURL, "ws://192.168.43.1:5801");
         SettingsManager.Themes.selectedThemeName = getValue(storedSettings.selectedThemeName, "CHARCOAL");
         SettingsManager.Themes.selectedTheme = SettingsManager.Themes[SettingsManager.Themes.selectedThemeName];
-        let theme = SettingsManager.Themes.selectedTheme;
-        let baseTheme = SettingsManager.Themes.BASE;
-        let keys = Object.keys(baseTheme);
-        for (let i = 0; i < keys.length; i++) {
-            theme[keys[i]] = baseTheme[keys[i]] + theme.suffix;
-        }
+        SettingsManager.populateTheme(SettingsManager.Themes.selectedTheme);
     },
 
     populateSettingsInfo: function () {
@@ -105,37 +108,63 @@ var SettingsManager = {
         Popup.setInputValue("websocket-url", SettingsManager.websocketURL);
     },
 
-    addStyleClass(currentClass, toAdd) {
+    manageStyleClass(identifierClassName, className, add) {
         try {
-            Array.from(document.getElementsByClassName(currentClass)).forEach((element) => {
-                element.classList.add(toAdd);
-            });
+            let elementsWithClass = Array.from(document.getElementsByClassName(identifierClassName));
+            if (add) {
+                elementsWithClass.forEach((element) => element.classList.add(className));
+            } else {
+                elementsWithClass.forEach((element) => element.classList.remove(className));
+            }
         } catch (err) {
             console.warn(err);
         }
     },
 
-    setTheme: function () {
-        let theme = SettingsManager.Themes.selectedTheme;
-        SettingsManager.addStyleClass("default-text", theme.defaultText);
-        document.getElementById("menu").classList.add(theme.menu);
-        document.getElementById("transition").classList.add(theme.menuTransition);
-        document.getElementById("whiteboard").classList.add(theme.whiteboard);
-        SettingsManager.addStyleClass("menu-button", theme.menuBtn);
-        SettingsManager.addStyleClass("dropdown-button", theme.menuBtn);
-        SettingsManager.addStyleClass("dropdown", theme.menuBtn);
-        SettingsManager.addStyleClass("dropdown-option", theme.menuBtn);
-        document.getElementById("layout-name-container").classList.add(theme.layoutName);
-        document.getElementById("layout-name").classList.add(theme.layoutNameTxt);
-        SettingsManager.addStyleClass("popup", theme.popup);
-        SettingsManager.addStyleClass("input-label", theme.inputLabel);
-        SettingsManager.addStyleClass("popup-input", theme.popupInput);
-        SettingsManager.addStyleClass("apply", theme.applyBtn);
-        Array.from(document.getElementsByClassName("close")).forEach((img) => { img.setAttribute("src", theme.attributes.closeSrc) });
-        SettingsManager.addStyleClass("prompt", theme.prompt);
-        document.getElementById("draggable-selectable-field").classList.add(theme.draggableField);
+    manageSingleElementStyleClass: function(id, className, add) {
+        if (add) {
+            document.getElementById(id).classList.add(className);
+        } else {
+            document.getElementById(id).classList.remove(className);
+        }
     },
 
+    populateTheme: function(theme) {
+        let baseTheme = SettingsManager.Themes.BASE;
+        let keys = Object.keys(baseTheme);
+        for (let i = 0; i < keys.length; i++) {
+            theme[keys[i]] = baseTheme[keys[i]] + theme.suffix;
+        }
+    },
+
+    manageTheme: function (theme, add) {
+        SettingsManager.manageStyleClass("default-text", theme.defaultText, add);
+        SettingsManager.manageStyleClass("menu-button", theme.menuBtn, add);
+        SettingsManager.manageStyleClass("dropdown-button", theme.menuBtn, add);
+        SettingsManager.manageStyleClass("dropdown", theme.menuBtn, add);
+        SettingsManager.manageStyleClass("dropdown-option", theme.menuBtn, add);
+        SettingsManager.manageStyleClass("popup", theme.popup, add);
+        SettingsManager.manageStyleClass("input-label", theme.inputLabel, add);
+        SettingsManager.manageStyleClass("popup-input", theme.popupInput, add);
+        SettingsManager.manageStyleClass("apply", theme.applyBtn, add);
+        SettingsManager.manageStyleClass("prompt", theme.prompt, add);
+        SettingsManager.manageStyleClass("whiteboard-label", theme.draggableLabel, add);
+        SettingsManager.manageStyleClass("list-container", theme.listContainer, add);
+        SettingsManager.manageStyleClass("selectable-container", theme.selectableContainer, add);
+        SettingsManager.manageSingleElementStyleClass("menu", theme.menu, add);
+        SettingsManager.manageSingleElementStyleClass("transition", theme.menuTransition, add);
+        SettingsManager.manageSingleElementStyleClass("whiteboard", theme.whiteboard, add);
+        SettingsManager.manageSingleElementStyleClass("layout-name-container", theme.layoutName, add);
+        SettingsManager.manageSingleElementStyleClass("layout-name", theme.layoutNameTxt, add);
+        SettingsManager.manageSingleElementStyleClass("draggable-selectable-field", theme.draggableField, add);
+        if (add) {
+            Array.from(document.getElementsByClassName("close")).forEach((img) => { img.setAttribute("src", theme.attributes.closeSrc) });
+        }
+    },
+
+    setTheme: function() {
+        SettingsManager.manageTheme(SettingsManager.Themes.selectedTheme, true);
+    }
 };
 
 window.SettingsManager = SettingsManager || {};

@@ -1,8 +1,11 @@
 var Popup = {
 
     POPUP_INPUT_CLASSNAME: "popup-input",
+    CLOSE_BUTTON_CLASSNAME: "close",
+    openPopups: 0,
 
     openPopup: function (id) {
+        Popup.openPopups += 1;
         let popup = document.getElementById(id);
 
         popup.style.display = "block";
@@ -27,27 +30,18 @@ var Popup = {
         if (onopen != undefined) onopen.click();
     },
 
-    closePopupByCloser: function (target) {
-        Popup.closePopup(target);
-    },
-
     closePopup: function (popup) {
+        Popup.openPopups -= 1;
         Popup.selected = null;
         let animation = [{ width: popup.style.width, height: popup.style.height }, { width: "0px", height: "0px" }];
         let timing = { duration: 300, iterations: 1 };
         popup.animate(animation, timing).finished.then(() => popup.style.display = "none");
-        Popup.popupBackground.style.display = "none";
         for (let i = 0; i < popup.children.length; i++) {
             popup.children[i].style.opacity = 0;
         }
-    },
-
-    setPopupSize: function (element, width, height) {
-        width = parseFloat(width);
-        height = parseFloat(height);
-        element.style.width = width + "px";
-        element.style.height = height + "px";
-
+        if (Popup.openPopups == 0) {
+            Popup.popupBackground.style.display = "none";
+        }
     },
 
     generateSimpleInputPopup: function (popupName, onApply, input) {
@@ -74,66 +68,15 @@ var Popup = {
         return div;
     },
 
-    populatePopupClickableList: function (container, iterables, getName, getOnclick, unselectedStyle, selectedStyle, isSelectable = false) {
-        let group = new Popup.SelectableGroup();
+    populatePopupClickableList: function (container, selectedName, iterables, getOnclick, unselectedStyle, selectedStyle, isSelectable = false) {
+        let group = new Select.SelectableGroup();
         for (let i = 0; i < iterables.length; i++) {
-            let selectable = new Popup.Selectable(getName(iterables[i], i), getOnclick(iterables[i], i), unselectedStyle, selectedStyle, isSelectable);
+            let selectable = new Select.Selectable(iterables[i], getOnclick(iterables[i], i), unselectedStyle, selectedStyle, isSelectable);
             group.add(selectable);
         }
         group.generateHTML(container);
-    },
-
-    Selectable: class {
-        constructor(name, onclick, unselectedStyle, selectedStyle, isSelectable) {
-            this.group = null;
-            this.name = name;
-            if (unselectedStyle == undefined || unselectedStyle == null) {
-                this.unselectedStyle = "default-selectable " + SettingsManager.Themes.selectedTheme.defaultSelectable;
-            } else {
-                this.unselectedStyle = unselectedStyle;
-            }
-            if (selectedStyle == undefined || selectedStyle == null) {
-                this.selectedStyle = "default-selectable-selected " + SettingsManager.Themes.selectedTheme.defaultSelectableSelected;
-            } else {
-                this.selectedStyle = selectedStyle;
-            }
-            this.anchor = document.createElement("a");
-            this.anchor.setAttribute("class", this.unselectedStyle);
-            this.anchor.classList.add("selectable");
-            this.anchor.innerHTML = name;
-            this.anchor.onclick = function () {
-                if (isSelectable) {
-                    this.group.select(this);
-                }
-                try {
-                    if (!(onclick == null || onclick == undefined)) onclick();
-                } catch (e) {
-                    console.log(e);
-                }
-            }.bind(this);
-            this.isSelectable = isSelectable;
-        }
-
-    },
-
-    SelectableGroup: class {
-        selected = null;
-        selectables = [];
-        select(selectable) {
-            this.selected = selectable;
-            for (let i = 0; i < this.selectables.length; i++) {
-                let selectedStyles = this.selectables[i].selectedStyle.trim().split(" ");
-                selectedStyles.forEach((style) => this.selectables[i].anchor.classList.remove(style));
-            }
-            let selectedStyles = selectable.selectedStyle.trim().split(" ");
-            selectedStyles.forEach((style) => selectable.anchor.classList.add(style));
-        }
-        add(...selectableItems) {
-            selectableItems.forEach((selectable) => { this.selectables.push(selectable); selectable.group = this; });
-        }
-        generateHTML(parent) {
-            this.selectables.forEach((selectable) => parent.appendChild(selectable.anchor));
-        }
+        group.selectByName(selectedName);
+        return group;
     },
 
     PopupInput: class {
@@ -190,22 +133,6 @@ var Popup = {
         for (let i = 0; i < popupOpeners.length; i++) {
             popupOpeners[i].addEventListener("click", () => { Popup.openPopup(popupOpeners[i].getAttribute("popup")) })
         }
-    },
-
-    getPopupByOpener: function (target) {
-        return document.getElementById(target.getAttribute("popup"));
-    },
-
-    clickCloseBtn: function () {
-        try {
-            Popup.activePopups[Popup.activePopups.length - 1].getElementsByClassName("close")[0].click();
-        } catch {
-            console.warn("Could not close popup.");
-        }
-    },
-
-    clickOpener: function (popupId) {
-        document.getElementById(`open-${popupId}`).click();
     },
 
     getPopupFromChild: function (element) {

@@ -20,6 +20,7 @@
     <script type="text/javascript" src="./javascript/utils/event_checker.js"></script>
     <script type="text/javascript" src="./javascript/utils/popup/popup_tasks.js"></script>
     <script type="text/javascript" src="./javascript/utils/popup/popup.js"></script>
+    <script type="text/javascript" src="./javascript/utils/select.js"></script>
     <script type="text/javascript" src="./javascript/utils/whiteboard.js"></script>
     <script type="text/javascript" src="./javascript/main.js"></script>
 </head>
@@ -42,13 +43,13 @@
                     <a class="dropdown-option" popup="Load-layout-as" title="ctrl+shift+s">save layout as</a>
                     <a class="dropdown-option" onclick="Load.displayLayouts()" popup="open-layout" title="ctrl+o">open layout</a>
                     <a class="dropdown-option"
-                        onclick="Load.exportJSON(`webdashboard-layout:${Load.currentLayout}`)">export json</a>
+                        onclick="Load.exportJSON(`webdashboard-layout:${Load.currentLayoutName}`)">export json</a>
                     <a class="dropdown-option" popup="json-importer">import json</a>
                     <a class="dropdown-option not-default"
-                        onclick="Load.setAsDefault(`webdashboard-layout:${Load.currentLayout}`)">set as default</a>
+                        onclick="Load.setAsDefault(`webdashboard-layout:${Load.currentLayoutName}`)">set as default</a>
                     <a class="dropdown-option not-default" popup="layout-renamer">rename layout</a>
                     <a class="dropdown-option not-default" popup="remove-layout"
-                        onclick="Load.targetLayout = Load.currentLayout">delete layout</a>
+                        onclick="Load.targetLayout = Load.currentLayoutName">delete layout</a>
                     <a class="dropdown-option" popup="clear-storage">clear storage</a>
                 </div>
             </div>
@@ -88,7 +89,7 @@
                 <div id="default-settings-wrapper"></div>
             </div>
             <div id="theme-chooser-wrapper">
-                <p class="theme-chooser-label default-text">dashboard theme</p>
+                <p class="theme-chooser-label default-text">rustboard theme</p>
                 <div id="theme-wrapper" class="selectable-container"></div>
             </div>
         </div>
@@ -137,9 +138,11 @@
         <button class="apply" onclick="PopupTasks.defineSelectables(event)">apply</button>
     </div>
     <div id="logger-popup" class="popup" style="width: 90%; height: 90%;">
-        <div class="absolute-centered-wrapper" id="log-container">
-
-        </div>
+        <div class="absolute-centered-wrapper" id="log-container"></div>
+    </div>
+    <div id="border-configuration-setter" class="popup" style="width: 300px; height: 275px">
+        <div class="vertical-input-container absolute-centered-wrapper" id="border-config-inputs"></div>
+        <button class="apply" onclick="PopupTasks.configureBorder(event)">apply</button>
     </div>
 </body>
 </html>

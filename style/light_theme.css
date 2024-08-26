@@ -48,6 +48,10 @@
     color: #aeaeae;
 }
 
+.popup-input-light::placeholder {
+    color: #e6e6e6;
+}
+
 .apply-light {
     background-color: #aeaeae;
     color: white;
@@ -67,6 +71,10 @@
     background-color: white;
 }
 
+.draggable-selectable-field-light::placeholder {
+    color:#e6e6e6;
+}
+
 .default-selectable-light {
     background-color: white;
     color: #aeaeae;
@@ -81,4 +89,31 @@
 .default-selectable-selected-light {
     background-color: #aeaeae;
     color: white;
+}
+
+.draggable-unselect-light {
+    width: 100%;
+    height: 20px;
+    background-color: white;
+    color: #aeaeae;
+    text-align: center;
+}
+
+.draggable-select-light {
+    background-color: #aeaeae;
+    color: white;
+}
+
+.selectable-container-light {
+    border-color: #aeaeae;
+}
+
+.list-container-light {
+    border-color: #aeaeae;
+}
+
+.draggable-label-light {
+    border-color: #aeaeae;
+    color: #aeaeae;
+    background-color: white;
 }

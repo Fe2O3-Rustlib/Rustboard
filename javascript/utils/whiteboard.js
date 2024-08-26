@@ -198,7 +198,7 @@ var Whiteboard = {
             this.container = document.createElement("div");
             this.label = document.createElement("input");
             if (!Whiteboard.editingMode) this.label.readOnly = true;
-            this.div.className = "whiteboard-draggable";
+            this.div.className = Whiteboard.NODE_CLASSNAME;
             this.onDrag = (function() {
                 this.configuration.position = this.position;
                 this.updateChildPositions();
@@ -215,8 +215,11 @@ var Whiteboard = {
             this.setSize(configuration.size, false);
             this.setFontSize(configuration.fontSize);
             this.setColor(configuration.color);
+            this.configuration.borderWidth = getValue(configuration.borderWidth, 0);
+            this.setBorderWidth();
+            this.configuration.bodrerColor = getValue(configuration.borderColor, "transparent");
+            this.setBorderColor();
             this.configuration.streamURL = getValue(configuration.streamURL, "http://192.168.43.1:10000");
-            this.configuration.streamRequestPeriod = getValue(configuration.streamRequestPeriod, 100);
             this.setStreamSize(configuration.streamSize);
             this.selectableGroup = null;
             this.configuration.selectableNames = configuration.selectableNames;
@@ -237,7 +240,13 @@ var Whiteboard = {
             // #region dragging functionality
  
             this.div.onmouseover = (event) => {
-                if (Whiteboard.editingMode) { event.target.style.cursor = "move" } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON || this.configuration.type === Whiteboard.WhiteboardDraggable.Types.TOGGLE) { event.target.style.cursor = "pointer"; if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON) event.target.style.background = SettingsManager.Themes.selectedTheme.attributes.nodeHover } else { event.target.style.cursor = "auto" }
+                if (Whiteboard.editingMode) {
+                    event.target.style.cursor = "move" 
+                } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON || this.configuration.type === Whiteboard.WhiteboardDraggable.Types.TOGGLE) {
+                    event.target.style.cursor = "pointer"; if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON) event.target.style.background = SettingsManager.Themes.selectedTheme.attributes.nodeHover
+                } else {
+                    event.target.style.cursor = "auto";
+                }
             }
 
             this.div.onmouseleave = (event) => { event.target.style.background = this.configuration.color }
@@ -249,9 +258,7 @@ var Whiteboard = {
             this.whiteboard.appendChild(this.container);
             this.label.setAttribute("type", "text");
             this.label.className = "whiteboard-label";
-            this.label.style.background = SettingsManager.Themes.selectedTheme.attributes.draggableLabelBackground;
-            this.label.style.borderColor = SettingsManager.Themes.selectedTheme.attributes.draggableLabelColor;
-            this.label.style.color = SettingsManager.Themes.selectedTheme.attributes.draggableLabelColor;
+            this.label.classList.add(SettingsManager.Themes.selectedTheme.draggableLabel);
             this.label.placeholder = "Untitled";
             this.label.value = this.configuration.name;
             this.container.appendChild(this.label);
@@ -294,31 +301,30 @@ var Whiteboard = {
             this.setLastUpdate = this.setLastUpdate.bind(this);
             this.copy = this.copy.bind(this);
             this.drawGraph = this.drawGraph.bind(this);
-            this.refreshCameraStream = this.refreshCameraStream.bind(this);
+            this.setBorderWidth = this.setBorderWidth.bind(this);
+            this.setBorderColor = this.setBorderColor.bind(this);
+        }
+
+        setBorderWidth() {
+            this.div.style.borderStyle = "solid";
+            this.div.style.borderWidth = this.configuration.borderWidth;
+        }
+
+        setBorderColor() {
+            this.div.style.borderColor = this.configuration.borderColor;
         }
 
         setLastUpdate() {
             this.configuration.last_node_update = Date.now();
         }
 
-        refreshCameraStream() {
-            if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.CAMERA_STREAM) {
-                this.stream.src = `${this.configuration.streamURL}?timestamp=${Date.now()}`;
-                setTimeout(this.refreshCameraStream, this.configuration.streamRequestPeriod);
-            }
-        }
-
-        setStreamUpdatePeriod(periodMS) {
-            this.configuration.streamRequestPeriod = periodMS;
-        }
-
         generateSelectorHTML(selectableNames) {
             if (selectableNames == undefined) return;
             this.configuration.selectableNames = selectableNames;
             this.selectorContainer.innerHTML = "";
-            this.selectableGroup = new Popup.SelectableGroup();
+            this.selectableGroup = new Select.SelectableGroup();
             for (let i = 0; i < selectableNames.length; i++) {
-                this.selectableGroup.add(new Popup.Selectable(selectableNames[i], (() => { this.configuration.state = selectableNames[i]; this.setLastUpdate(); this.sendState() }).bind(this), SettingsManager.Themes.selectedTheme.draggableUnselect, SettingsManager.Themes.selectedTheme.draggableSelect, true));
+                this.selectableGroup.add(new Select.Selectable(selectableNames[i], (() => { this.configuration.state = selectableNames[i]; this.setLastUpdate(); this.sendState() }).bind(this), () => SettingsManager.Themes.selectedTheme.draggableUnselect, () => SettingsManager.Themes.selectedTheme.draggableSelect, true));
             }
             this.selectableGroup.generateHTML(this.selectorContainer);
         }
@@ -338,15 +344,9 @@ var Whiteboard = {
                 } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.TEXT_INPUT) {
                     this.textField.value = state;
                 } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.SELECTOR) {
-                    let toSelect = null;
-                    for (let i = 0; i < this.selectableGroup.selectables.length; i++) {
-                        if (this.selectableGroup.selectables[i].name == state) {
-                            toSelect = this.selectableGroup.selectables[i];
-                        }
+                    if (this.selectableGroup.selectByName(state)) {
+                        this.configuration.state = state;
                     }
-                    if (toSelect == null) throw new Error("Selector node does not have requested state");
-                    this.selectableGroup.select(toSelect);
-                    this.configuration.state = toSelect.name;
                 } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.GRAPH) {
                     if (state === "") {
                         state = "x: 0 y: 0.0 heading: 0.0";
@@ -803,7 +803,6 @@ var Whiteboard = {
             } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.CAMERA_STREAM) {
                 this.stream.style.display = "block";
                 this.setStreamURL(this.configuration.streamURL);
-                this.refreshCameraStream();
             } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.GRAPH) {
                 this.setColor("gray");
                 this.canvas.style.display = "block";
@@ -874,8 +873,8 @@ var Whiteboard = {
         }
     },
 
-    getDraggableIndex: function (draggable) {
-        return parseInt(draggable.getAttribute("index"));
+    getNodeIndex: function (node) {
+        return parseInt(node.getAttribute("index"));
     },
 
     addDefaultNode: function () {
@@ -914,7 +913,7 @@ var Whiteboard = {
 
     getDraggableAncestor: function (element, recursion) {
         if (recursion == undefined) recursion = 0;
-        if (element == null || element.classList.contains("whiteboard-draggable")) {
+        if (element == null || element.classList.contains(Whiteboard.NODE_CLASSNAME)) {
             return element;
         } else if (recursion < 10) {
             return Whiteboard.getDraggableAncestor(element.parentElement, recursion + 1);
@@ -1007,7 +1006,7 @@ var Whiteboard = {
     // #endregion
 
     toggleEditingMode: function () {
-        var editingToggle = document.getElementById("editingToggle");
+        var editingToggle = document.getElementById(Whiteboard.EDITING_TOGGLE_ID);
         var labels = document.getElementsByClassName("whiteboard-label");
         var editModeOnlyBtns = document.getElementsByClassName("edit-mode-only");
         var border = document.getElementById("whiteboard-border");
@@ -1016,13 +1015,13 @@ var Whiteboard = {
             editingToggle.innerHTML = "enable editing";
             Array.from(labels).forEach((label) => label.readOnly = true);
             Array.from(editModeOnlyBtns).forEach((button) => button.style.display = "none");
-            this.layoutNodeRegistry.forEach((draggable) => { draggable.div.title = "" });
+            this.layoutNodeRegistry.forEach((node) => { node.div.title = "" });
         } else {
             border.style.display = "block";
             editingToggle.innerHTML = "disable editing";
             Array.from(labels).forEach((label) => label.readOnly = false);
             Array.from(editModeOnlyBtns).forEach((button) => button.style.display = "block");
-            this.layoutNodeRegistry.forEach((draggable) => { draggable.div.title = `ID: ${draggable.configuration.id}` });
+            this.layoutNodeRegistry.forEach((node) => { node.div.title = `ID: ${node.configuration.id}` });
         }
         Whiteboard.editingMode = !Whiteboard.editingMode;
     },
@@ -1046,9 +1045,9 @@ var Whiteboard = {
     unlinkedNodeWithId: function(id) {
         const layoutNames = Load.listLayoutNames();
         for (let i = 0; i < layoutNames.length; i++) {
-            if (layoutNames[i] !== Load.currentLayout) {
+            if (layoutNames[i] !== Load.currentLayoutName) {
                 try {
-                    let nodeData = JSON.parse(`webdashboard-layout:${layoutNames[i]}`).nodeData;
+                    let nodeData = JSON.parse(Load.LAYOUT_PREFIX + layoutNames[i]).nodeData;
                     for (let ii = 0; ii < nodeData.length; ii++) {
                         if (nodeData[ii].id === id && nodeData[ii].type !== type) {
                             return true;
@@ -1066,8 +1065,8 @@ var Whiteboard = {
         let nodes = new Map();
         let layoutNames = Load.listLayoutNames();
         for (let i = 0; i < layoutNames.length; i++) {
-            if (layoutNames[i] !== Load.currentLayout) {
-                let layoutObject = JSON.parse(localStorage.getItem(`webdashboard-layout:${layoutNames[i]}`));
+            if (layoutNames[i] !== Load.currentLayoutName) {
+                let layoutObject = JSON.parse(localStorage.getItem(Load.LAYOUT_PREFIX + layoutNames[i]));
                 for (let ii = 0; ii < layoutObject.nodeData.length; ii++) {
                     let nodeConfiguration = layoutObject.nodeData[ii];
                     nodes.set(
@@ -1101,6 +1100,10 @@ var Whiteboard = {
     currentNode: null,
     currentPathPoint: null,
     editingMode: false,
+    EDITING_TOGGLE_ID: "editingToggle",
+    NODE_CLASSNAME: "whiteboard-draggable",
+    NODE_LABEL_CLASSNAME: "whiteboard-label",
+    WHITEBOARD_BORDER_ID: "whiteboard-border"
 };
 
 window.Whiteboard = Whiteboard || {};
