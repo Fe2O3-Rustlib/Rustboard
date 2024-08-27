@@ -216,7 +216,7 @@ var PopupTasks = {
         Popup.getInput("node-color-input").value = Whiteboard.currentNode.configuration.color;
     },
 
-    populateNodeColor: function() {
+    populateNodeHighlightColor: function() {
         Popup.getInput("node-highlight-color-input").value = Whiteboard.currentNode.configuration.highlightColor;
     },
 
@@ -249,6 +249,11 @@ var PopupTasks = {
             }
         }
         textField.value = nameStr;
+    },
+
+    populateNodeBorder: function() {
+        Popup.getInput("draggable-border-color").value = Whiteboard.currentNode.configuration.borderColor;
+        Popup.getInput("draggable-border-width").value = Whiteboard.currentNode.configuration.borderWidth;
     },
 
     populateWhiteboardBorderSize: function() {

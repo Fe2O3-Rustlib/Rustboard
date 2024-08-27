@@ -207,7 +207,7 @@ function generateContextMenu(event) {
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.TEXT_TELEMETRY) || node.isType(Whiteboard.WhiteboardDraggable.Types.TEXT_INPUT)) {
                     generateContextMenuButton(container, "set font size", () => Popup.openPopup("text-telemetry-font-size-setter"));
                 }
-                generateContextMenuButton(container, "configure border", () => Popup.openPopup("border-configuration-setter"));
+                generateContextMenuButton(container, "configure border", () => {Popup.openPopup("border-configuration-setter"); PopupTasks.populateNodeBorder()});
                 generateContextMenuButton(container, "set size", () => Popup.openPopup("size-picker"));
                 generateContextMenuButton(container, "set position", () => {Popup.openPopup("position-setter"); PopupTasks.populatePositionInfo()});
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.TEXT_INPUT) || node.isType(Whiteboard.WhiteboardDraggable.Types.TOGGLE)) {
