@@ -42,6 +42,7 @@ var PopupTasks = {
             Notify.createNotice("Invalid node size", Notify.NEGATIVE, 5000);
         } else {
             Whiteboard.currentNode.setSize(new Positioning.Vector2d(width, height));
+            Whiteboard.currentNode.configureBorder(Whiteboard.currentNode.configuration.borderColor, Whiteboard.currentNode.configuration.borderWidth);
             Popup.closePopup(popup);
         }
     },

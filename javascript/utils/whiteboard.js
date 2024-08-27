@@ -217,10 +217,7 @@ var Whiteboard = {
             this.updateIndex(Whiteboard.layoutNodeRegistry.length);
             this.configuration.name = configuration.name;
             this.configuration.position = configuration.position;
-            this.configuration.borderWidth = getValue(configuration.borderWidth, 0);
-            this.setBorderWidth();
-            this.configuration.borderColor = getValue(configuration.borderColor, "transparent");
-            this.setBorderColor();
+            this.configureBorder(getValue(configuration.borderColor, "transparent"), getValue(configuration.borderWidth, 0));
             this.setSize(configuration.size, false);
             this.setFontSize(configuration.fontSize);
             this.setColor(configuration.color);
@@ -315,20 +312,20 @@ var Whiteboard = {
             this.findId = this.findId.bind(this);
         }
 
-        setBorderWidth() {
+        setBorderWidth(width) {
+            this.configuration.borderWidth = Math.min(width, Math.floor(0.0005 * this.configuration.size.x * this.configuration.size.y));
             this.borderDiv.style.borderStyle = "solid";
             this.borderDiv.style.borderWidth = this.configuration.borderWidth + "px";
         }
 
-        setBorderColor() {
+        setBorderColor(color) {
+            this.configuration.borderColor = color;
             this.borderDiv.style.borderColor = this.configuration.borderColor;
         }
 
         configureBorder(color, width) {
-            this.configuration.borderColor = color;
-            this.configuration.borderWidth = width;
-            this.setBorderColor();
-            this.setBorderWidth();
+            this.setBorderColor(color);
+            this.setBorderWidth(width);
             this.setSize(this.configuration.size);
         }
 
@@ -722,7 +719,7 @@ var Whiteboard = {
                 for (let i = 0; i < this.pathPoints.length; i++) {
                     this.pathPoints[i].setFieldPosition(this.pathPoints[i].fieldVector);
                 }
-            }            
+            }   
         }
 
         setFontSize(size) {
