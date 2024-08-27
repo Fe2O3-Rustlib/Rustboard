@@ -25,18 +25,17 @@ function initialize() { // This is called when the body portion of the html docu
 
     Popup.generateSimpleInputPopup("Load-layout-as", Load.saveJSON, new Popup.PopupInput("Enter the new layout name", "Save as"));
     Popup.generateSimpleInputPopup("layout-renamer", PopupTasks.renameLayout, new Popup.PopupInput("Enter the new layout name", "rename layout"));
-    Popup.generateSimpleInputPopup("whiteboard-size-setter", PopupTasks.setWhiteboardBorderSize, new Popup.PopupInput("750x500", "border size"));
-    Popup.generateSimpleInputPopup("size-picker", PopupTasks.setDraggableSize, new Popup.PopupInput("100x100", "draggable size"));
-    Popup.generateSimpleInputPopup("color-picker", PopupTasks.changeColor, new Popup.PopupInput("#ffffff", "draggable color"));
-    Popup.generateSimpleInputPopup("id-changer", PopupTasks.changeID, new Popup.PopupInput("Enter draggable id", "draggable id", "draggable-id"));
-    Popup.generateSimpleInputPopup("stream-url-setter", PopupTasks.setStreamURL, new Popup.PopupInput("http://roborio-TEAM-frc.local:1181/?action=stream", "set stream url", "stream-url-input"));
-    Popup.generateSimpleInputPopup("stream-size-setter", PopupTasks.setStreamSize, new Popup.PopupInput("width x height", "stream size"));
-    Popup.generateSimpleInputPopup("text-telemetry-font-size-setter", PopupTasks.setFontSize, new Popup.PopupInput("15", "font size"));
-    Popup.generateSimpleInputPopup("path-timeout-setter", PopupTasks.setPathTimeout, new Popup.PopupInput("10000", "path timeout (milliseconds)"));
-    Popup.generateSimpleInputPopup("distance-to-pixels-setter", PopupTasks.setDistanceToPixels, new Popup.PopupInput(5, "distance to pixels constant"));
-    Popup.setOnOpen("path-timeout-setter", PopupTasks.populatePathTimeout);
+    Popup.generateSimpleInputPopup("whiteboard-size-setter", PopupTasks.setWhiteboardBorderSize, new Popup.PopupInput("750x500", "border size", "border-size-input"), PopupTasks.populateWhiteboardBorderSize);
+    Popup.generateSimpleInputPopup("size-picker", PopupTasks.setDraggableSize, new Popup.PopupInput("100x100", "node size", "node-size-input"), PopupTasks.populateNodeSize);
+    Popup.generateSimpleInputPopup("color-picker", PopupTasks.changeColor, new Popup.PopupInput("#ffffff", "node color", "node-color-input"), PopupTasks.populateNodeColor);
+    Popup.generateSimpleInputPopup("highlight-color-picker", PopupTasks.changeHighlightColor, new Popup.PopupInput("#ffffff", "node highlight color", "node-highlight-color-input"), PopupTasks.populateNodeHighlightColor);
+    Popup.generateSimpleInputPopup("id-changer", PopupTasks.changeID, new Popup.PopupInput("", "node id", "draggable-id"), PopupTasks.populateNodeId);
+    Popup.generateSimpleInputPopup("stream-url-setter", PopupTasks.setStreamURL, new Popup.PopupInput("http://roborio-TEAM-frc.local:1181/?action=stream", "set stream url", "stream-url-input"), PopupTasks.populateNodeStreamUrl);
+    Popup.generateSimpleInputPopup("stream-size-setter", PopupTasks.setStreamSize, new Popup.PopupInput("width x height", "stream size", "stream-size-input"), PopupTasks.populateStreamSize);
+    Popup.generateSimpleInputPopup("text-telemetry-font-size-setter", PopupTasks.setFontSize, new Popup.PopupInput("15", "font size", "font-size-input"), PopupTasks.populateFontSize);
+    Popup.generateSimpleInputPopup("path-timeout-setter", PopupTasks.setPathTimeout, new Popup.PopupInput("10000", "path timeout (milliseconds)"), PopupTasks.populatePathTimeout);
+    Popup.generateSimpleInputPopup("distance-to-pixels-setter", PopupTasks.setDistanceToPixels, new Popup.PopupInput(5, "distance to pixels constant", "d-to-p-input"), PopupTasks.populateDistanceToPixels);
 
-    Popup.setOnOpen("stream-url-setter", () => Popup.getInput("stream-url-input").value = Whiteboard.currentNode.configuration.streamURL);
 
     let draggableTypes = [];
     Object.keys(Whiteboard.WhiteboardDraggable.Types).forEach((key) => draggableTypes.push(Whiteboard.WhiteboardDraggable.Types[key]));
@@ -195,12 +194,15 @@ function generateContextMenu(event) {
                 }
                 generateContextMenuButton(container, "send to front", () => { Whiteboard.logChange(); node.setLayer(Whiteboard.layoutNodeRegistry.length - 1) });
                 generateContextMenuButton(container, "send to back", () => { Whiteboard.logChange(); node.setLayer(0) });
-                generateContextMenuButton(container, "set id", () => {Popup.openPopup("id-changer"); Popup.getInput("draggable-id").value = node.configuration.id});
+                generateContextMenuButton(container, "set id", () => Popup.openPopup("id-changer"));
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.GRAPH)) {
                     generateContextMenuButton(container, "configure units", () => Popup.openPopup("distance-to-pixels-setter"));
                 }
                 if (!node.isType(Whiteboard.WhiteboardDraggable.Types.TOGGLE) && !node.isType(Whiteboard.WhiteboardDraggable.Types.BOOLEAN_TELEMETRY)) {
                     generateContextMenuButton(container, "set color", () => Popup.openPopup("color-picker"));
+                }
+                if (node.isType(Whiteboard.WhiteboardDraggable.Types.BUTTON)) {
+                    generateContextMenuButton(container, "set highlight color", () => Popup.openPopup("highlight-color-picker"));
                 }
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.TEXT_TELEMETRY) || node.isType(Whiteboard.WhiteboardDraggable.Types.TEXT_INPUT)) {
                     generateContextMenuButton(container, "set font size", () => Popup.openPopup("text-telemetry-font-size-setter"));
@@ -212,7 +214,7 @@ function generateContextMenu(event) {
                     generateContextMenuButton(container, "save to robot", () => node.sendInput());
                 }
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.SELECTOR)) {
-                    generateContextMenuButton(container, "define selectables", () => Popup.openPopup("draggable-selector-creator"));
+                    generateContextMenuButton(container, "define selectables", () => {Popup.openPopup("draggable-selector-creator"); PopupTasks.populateSelectableNames()});
                 }
                 if (node.isType(Whiteboard.WhiteboardDraggable.Types.CAMERA_STREAM)) {
                     generateContextMenuButton(container, "set stream url", () => Popup.openPopup("stream-url-setter"));

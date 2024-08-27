@@ -68,6 +68,7 @@
 .draggable-selectable-field-dark {
     border: 5px solid black;
     background-color: #f5770a;
+    color: black;
 }
 
 .draggable-selectable-field-dark::placeholder {

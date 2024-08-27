@@ -69,6 +69,7 @@
 .draggable-selectable-field-blue {
     border: 5px solid #0098cb;
     background-color: white;
+    color: #0098cb;
 }
 
 .draggable-selectable-field-blue::placeholder {

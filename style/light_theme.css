@@ -69,6 +69,7 @@
 .draggable-selectable-field-light {
     border: 5px solid #aeaeae;
     background-color: white;
+    color: #aeaeae;
 }
 
 .draggable-selectable-field-light::placeholder {

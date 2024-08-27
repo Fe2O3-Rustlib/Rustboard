@@ -146,13 +146,14 @@ var Whiteboard = {
             name: undefined,
             position: new Positioning.Vector2d(50, 50),
             size: new Positioning.Vector2d(100, 100),
+            highlightColor: "black",
             color: undefined,
             layer: undefined,
             type: Whiteboard.WhiteboardDraggable.Types.BUTTON,
             id: undefined,
             state: undefined,
             streamURL: undefined,
-            streamSize: undefined,
+            streamSize: new Positioning.Vector2d(0, 0),
             selectableNames: undefined,
             fontSize: undefined,
             followTimeout: undefined,
@@ -223,6 +224,7 @@ var Whiteboard = {
             this.setSize(configuration.size, false);
             this.setFontSize(configuration.fontSize);
             this.setColor(configuration.color);
+            this.configuration.highlightColor = getValue(configuration.highlightColor, "black");
             this.configuration.streamURL = getValue(configuration.streamURL, "http://192.168.43.1:10000");
             this.setStreamSize(configuration.streamSize);
             this.selectableGroup = null;
@@ -247,7 +249,10 @@ var Whiteboard = {
                 if (Whiteboard.editingMode) {
                     event.target.style.cursor = "move" 
                 } else if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON || this.configuration.type === Whiteboard.WhiteboardDraggable.Types.TOGGLE) {
-                    event.target.style.cursor = "pointer"; if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON) event.target.style.background = SettingsManager.Themes.selectedTheme.attributes.nodeHover
+                    event.target.style.cursor = "pointer"; 
+                    if (this.configuration.type === Whiteboard.WhiteboardDraggable.Types.BUTTON) {
+                        event.target.style.background = this.configuration.highlightColor;
+                    }
                 } else {
                     event.target.style.cursor = "auto";
                 }
@@ -307,6 +312,7 @@ var Whiteboard = {
             this.drawGraph = this.drawGraph.bind(this);
             this.setBorderWidth = this.setBorderWidth.bind(this);
             this.setBorderColor = this.setBorderColor.bind(this);
+            this.findId = this.findId.bind(this);
         }
 
         setBorderWidth() {
@@ -733,6 +739,10 @@ var Whiteboard = {
             this.div.style.background = color;
         }
 
+        setHighlightColor(highlightColor) {
+            this.configuration.highlightColor = highlightColor;
+        }
+
         setLayer(layer, arrangeOthers = true) {
             if (layer === this.configuration.layer) return;
             this.container.style.zIndex = 1000 + layer;
@@ -854,9 +864,23 @@ var Whiteboard = {
             this.stream.style.height = Positioning.toHTMLPositionPX(size.y);
         }
 
+        findId(counter = 0) {
+            let id = `${Load.currentLayoutName}_${this.configuration.type.replace(" ", "_")}_${this.arrayIndex}_${counter}`; // To minimize collisions
+            let layoutNames = Load.listLayoutNames();
+            for (let i = 0; i < layoutNames.length; i++) {
+                let layout = JSON.parse(localStorage.getItem(Load.LAYOUT_PREFIX + layoutNames[i]));
+                for (let ii = 0; ii < layout.nodeData.length; ii++) {
+                    if (layout.nodeData[ii].id === id) {
+                        return this.findId(counter + 1);
+                    }
+                }
+            }
+            return id;
+        }
+
         setId(id) {
             if (id == null || id == "undefined" || id == "") {
-                id = `${this.configuration.type.replace(" ", "_")}_${this.arrayIndex}`;
+                id = this.findId();
             }
             this.div.id = id;
             this.configuration.id = id;
@@ -1062,9 +1086,9 @@ var Whiteboard = {
         }
     },
 
-    visibleNodeWithId: function(id) {
+    visibleNodeWithId: function(node) {
         for (let i = 0; i < Whiteboard.layoutNodeRegistry.length; i++) {
-            if (Whiteboard.layoutNodeRegistry[i].configuration.id === id) {
+            if (Whiteboard.layoutNodeRegistry[i].configuration.id === node.configuration.id && Whiteboard.layoutNodeRegistry[i] !== node) {
                 return true;
             }
         }
@@ -1076,7 +1100,7 @@ var Whiteboard = {
         for (let i = 0; i < layoutNames.length; i++) {
             if (layoutNames[i] !== Load.currentLayoutName) {
                 try {
-                    let nodeData = JSON.parse(Load.LAYOUT_PREFIX + layoutNames[i]).nodeData;
+                    let nodeData = JSON.parse(localStorage.get(Load.LAYOUT_PREFIX + layoutNames[i])).nodeData;
                     for (let ii = 0; ii < nodeData.length; ii++) {
                         if (nodeData[ii].id === id && nodeData[ii].type !== type) {
                             return true;

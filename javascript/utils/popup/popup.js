@@ -44,7 +44,7 @@ var Popup = {
         }
     },
 
-    generateSimpleInputPopup: function (popupName, onApply, input) {
+    generateSimpleInputPopup: function (popupName, onApply, input, onOpen) {
         let div = document.createElement("div");
         div.id = popupName;
         div.setAttribute("class", "popup");
@@ -54,7 +54,6 @@ var Popup = {
         let inputContainer = document.createElement("div");
         inputContainer.setAttribute("class", "absolute-centered-wrapper");
         div.appendChild(inputContainer);
-
         input.generateHTML(inputContainer);
 
         let apply = document.createElement("button");
@@ -64,8 +63,16 @@ var Popup = {
         div.appendChild(apply);
 
         document.body.appendChild(div);
-
+        Popup.onPopupOpen(popupName, onOpen);
         return div;
+    },
+
+    onPopupOpen: function(popupId, onOpenFunction) {
+        let popup = document.getElementById(popupId);
+        let onOpenAnchor = document.createElement("a");
+        onOpenAnchor.classList.add("popup-onopen");
+        onOpenAnchor.onclick = getValue(onOpenFunction, () => {});
+        popup.appendChild(onOpenAnchor);
     },
 
     populatePopupClickableList: function (container, selectedName, iterables, getOnclick, unselectedStyle, selectedStyle, isSelectable = false) {

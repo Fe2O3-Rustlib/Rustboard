@@ -3,7 +3,7 @@ var PopupTasks = {
         Whiteboard.logChange();
         let popup = Popup.getPopupFromChild(event.target);
         let id = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
-        if (Whiteboard.visibleNodeWithId(id)) {
+        if (Whiteboard.visibleNodeWithId(Whiteboard.currentNode)) {
             Notify.createNotice("Nodes within the same layout cannot have the same id", Notify.NEGATIVE, 5000);
             return;
         } else if (Whiteboard.unlinkedNodeWithId(id)) {
@@ -20,6 +20,14 @@ var PopupTasks = {
         let popup = Popup.getPopupFromChild(event.target);
         let color = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
         Whiteboard.currentNode.setColor(color);
+        Popup.closePopup(popup);
+    },
+
+    changeHighlightColor: function (event) {
+        Whiteboard.logChange();
+        let popup = Popup.getPopupFromChild(event.target);
+        let color = popup.getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value;
+        Whiteboard.currentNode.setHighlightColor(color);
         Popup.closePopup(popup);
     },
 
@@ -71,7 +79,7 @@ var PopupTasks = {
             Whiteboard.currentNode.generateSelectorHTML(names);
             Popup.closePopup(popup);
         } catch {
-            Notify.createNotice("Illegal input!", Notify.NEGATIVE, 3000);
+            Notify.createNotice("Invalid input", Notify.NEGATIVE, 5000);
         }
     },
 
@@ -194,6 +202,61 @@ var PopupTasks = {
         if (Whiteboard.currentNode.configuration.followTimeout != undefined)  {
             document.getElementById("path-timeout-setter").getElementsByClassName(Popup.POPUP_INPUT_CLASSNAME)[0].value = Whiteboard.currentNode.configuration.followTimeout;
         }
+    },
+
+    populateNodeId: function() {
+        Popup.getInput("draggable-id").value = Whiteboard.currentNode.configuration.id;
+    },
+
+    populateNodeSize: function() {
+        Popup.getInput("node-size-input").value = `${Whiteboard.currentNode.configuration.size.x}x${Whiteboard.currentNode.configuration.size.y}`;
+    },
+
+    populateNodeColor: function() {
+        Popup.getInput("node-color-input").value = Whiteboard.currentNode.configuration.color;
+    },
+
+    populateNodeColor: function() {
+        Popup.getInput("node-highlight-color-input").value = Whiteboard.currentNode.configuration.highlightColor;
+    },
+
+    populateFontSize: function() {
+        let popupInput = Popup.getInput("font-size-input");
+        popupInput.value = Whiteboard.currentNode.configuration.fontSize;
+    },
+
+    populateNodeStreamUrl: function() {
+        Popup.getInput("stream-url-input").value = Whiteboard.currentNode.configuration.streamURL;
+    },
+
+    populateStreamSize: function() {
+        let size = Whiteboard.currentNode.configuration.streamSize;
+        Popup.getInput("stream-size-input").value = `${size.x}x${size.y}`;
+    },
+
+    populateDistanceToPixels: function() {
+        Popup.getInput("d-to-p-input").value = Whiteboard.currentNode.configuration.distanceToPixels;
+    },
+
+    populateSelectableNames: function() {
+        let textField = document.getElementById("draggable-selectable-field");
+        let group = Whiteboard.currentNode.selectableGroup;
+        let nameStr = "";
+        for (let i = 0; i < group.selectables.length; i++) {
+            nameStr += group.selectables[i].name;
+            if (i != group.selectables.length - 1) {
+                nameStr += ", ";
+            }
+        }
+        textField.value = nameStr;
+    },
+
+    populateWhiteboardBorderSize: function() {
+        let popupInput = Popup.getInput("border-size-input");
+        let border = document.getElementById("whiteboard-border");
+        let width = border.clientWidth;
+        let height = border.clientHeight;
+        popupInput.value = `${width}x${height}`;
     },
 
     setPathTimeout() {
